@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.css": "/realms-of-ether/static/css/main.73e6ca3c.chunk.css",
-    "main.js": "/realms-of-ether/static/js/main.cf189107.chunk.js",
-    "main.js.map": "/realms-of-ether/static/js/main.cf189107.chunk.js.map",
-    "runtime-main.js": "/realms-of-ether/static/js/runtime-main.8cc7e352.js",
-    "runtime-main.js.map": "/realms-of-ether/static/js/runtime-main.8cc7e352.js.map",
-    "static/js/2.db3314f5.chunk.js": "/realms-of-ether/static/js/2.db3314f5.chunk.js",
-    "static/js/2.db3314f5.chunk.js.map": "/realms-of-ether/static/js/2.db3314f5.chunk.js.map",
-    "index.html": "/realms-of-ether/index.html",
-    "static/css/main.73e6ca3c.chunk.css.map": "/realms-of-ether/static/css/main.73e6ca3c.chunk.css.map",
-    "static/js/2.db3314f5.chunk.js.LICENSE.txt": "/realms-of-ether/static/js/2.db3314f5.chunk.js.LICENSE.txt",
-    "static/media/castle.png": "/realms-of-ether/static/media/castle.3022023b.png"
+    "main.css": "/static/css/main.73e6ca3c.chunk.css",
+    "main.js": "/static/js/main.cf189107.chunk.js",
+    "main.js.map": "/static/js/main.cf189107.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.a0095a59.js",
+    "runtime-main.js.map": "/static/js/runtime-main.a0095a59.js.map",
+    "static/js/2.db3314f5.chunk.js": "/static/js/2.db3314f5.chunk.js",
+    "static/js/2.db3314f5.chunk.js.map": "/static/js/2.db3314f5.chunk.js.map",
+    "index.html": "/index.html",
+    "static/css/main.73e6ca3c.chunk.css.map": "/static/css/main.73e6ca3c.chunk.css.map",
+    "static/js/2.db3314f5.chunk.js.LICENSE.txt": "/static/js/2.db3314f5.chunk.js.LICENSE.txt",
+    "static/media/castle.png": "/static/media/castle.3022023b.png"
   },
   "entrypoints": [
-    "static/js/runtime-main.8cc7e352.js",
+    "static/js/runtime-main.a0095a59.js",
     "static/js/2.db3314f5.chunk.js",
     "static/css/main.73e6ca3c.chunk.css",
     "static/js/main.cf189107.chunk.js"
