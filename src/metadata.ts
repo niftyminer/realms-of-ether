@@ -46,7 +46,7 @@ export const calculateYear = (blockNumber: number) => {
   }
 };
 
-const metadata: FortressData[] = [
+export const metadata: FortressData[] = [
   {
     name: '"Genesis"\u0000\u0000\u0000\u0000\u0000\u0000\u0000',
     x: "1",

@@ -18,6 +18,7 @@ import {
   findFortress,
   findFortressNumber,
   FortressData,
+  metadata,
 } from "../metadata";
 import { useQueryString } from "../utils/queryState";
 import { useEffect } from "react";
@@ -200,8 +201,84 @@ export const App: FC = () => {
             </Container>
             <div style={{ display: "flex", flex: 1 }} />
           </div>
+          <div style={{ height: 20 }} />
         </>
       )}
+      <Container rounded title="Realms">
+        <Table bordered>
+          <tbody>
+            {numbers.map((x) => {
+              return (
+                <tr key={x}>
+                  {numbers.map((y) => {
+                    const fortress = metadata.find(
+                      (f) => f.x === x.toString() && f.y === y.toString()
+                    );
+
+                    return (
+                      <td
+                        className="tooltip"
+                        data-text={
+                          fortress != null
+                            ? `index: ${findFortressNumber(x, y)}
+name: ${fortress.name}
+position: x: ${fortress.x} y: ${fortress.y}
+`
+                            : x === "0" && y === "0"
+                            ? "Ether"
+                            : "Emptiness"
+                        }
+                        style={{
+                          backgroundImage:
+                            fortress != null ? castle : undefined,
+                        }}
+                        key={y}
+                      >
+                        {x === "0" && y === "0"
+                          ? "Ξ"
+                          : metadata.find(
+                              (f) =>
+                                f.x === x.toString() && f.y === y.toString()
+                            ) != null
+                          ? "F"
+                          : "x"}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </Table>
+      </Container>
     </div>
   );
 };
+
+const numbers = [
+  "-12",
+  "-11",
+  "-10",
+  "-9",
+  "-8",
+  "-7",
+  "-6",
+  "-5",
+  "-4",
+  "-3",
+  "-2",
+  "-1",
+  "0",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+];
