@@ -23,9 +23,17 @@ import {
 import { useQueryString } from "../utils/queryState";
 import { useEffect } from "react";
 import { useCallback } from "react";
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
+import { Wallet } from "./Wallet";
+import { getEthereumClient } from "../utils/ethereum";
+import { roeABI } from "../contracts/RealmsOfEther";
+import { roeWrapperABI } from "../contracts/RealmsOfEtherWrapper";
 
 const castle = require("../assets/castle.png").default;
+
+const ROE_CONTRACT_ADDRESS = "0x0716d44d5991b15256A2de5769e1376D569Bba7C";
+const ROE_WRAPPER_CONTRACT_ADDRESS =
+  "0x8479277AaCFF4663Aa4241085a7E27934A0b0840";
 
 export const App: FC = () => {
   const [xInput, setXInput] = useQueryString("x", "");
@@ -33,6 +41,17 @@ export const App: FC = () => {
   const [searchResult, setSearchResult] = useState<
     FortressData | null | undefined
   >(null);
+  const [selectedAddress, setSelectedAddress] = useState<string | undefined>();
+  const [networkError, setNetworkError] = useState<string | undefined>();
+  const [roeContract, setRoeContract] = useState<undefined | ethers.Contract>();
+  const [roeWrapperContract, setRoeWrapperContract] = useState<
+    undefined | ethers.Contract
+  >();
+
+  const resetState = useCallback(() => {
+    setSelectedAddress(undefined);
+    setNetworkError(undefined);
+  }, []);
 
   useEffect(() => {
     if (xInput !== "" && yInput !== "") {
@@ -44,6 +63,49 @@ export const App: FC = () => {
     const f = findFortress(xInput as string, yInput as string);
     setSearchResult(f);
   }, [xInput, yInput]);
+
+  const intializeEthers = useCallback(() => {
+    const provider = new ethers.providers.Web3Provider(
+      (window as any).ethereum,
+      "any"
+    );
+
+    setRoeWrapperContract(
+      new ethers.Contract(
+        ROE_WRAPPER_CONTRACT_ADDRESS,
+        roeWrapperABI,
+        provider.getSigner(0)
+      )
+    );
+    setRoeContract(
+      new ethers.Contract(ROE_CONTRACT_ADDRESS, roeABI, provider.getSigner(0))
+    );
+  }, []);
+
+  const initialize = useCallback(
+    (userAddress: string) => {
+      setSelectedAddress(userAddress);
+      intializeEthers();
+    },
+    [intializeEthers]
+  );
+
+  const connectWallet = useCallback(async () => {
+    const [selectedAddress] = await getEthereumClient().enable();
+    initialize(selectedAddress);
+
+    getEthereumClient().on("accountsChanged", ([newAddress]: [string]) => {
+      if (newAddress === undefined) {
+        return resetState();
+      }
+
+      initialize(newAddress);
+    });
+
+    getEthereumClient().on("networkChanged", ([networkId]: [string]) => {
+      resetState();
+    });
+  }, [initialize, resetState]);
 
   return (
     <div
@@ -58,8 +120,37 @@ export const App: FC = () => {
         alignItems: "center",
       }}
     >
-      <h1>Realms Of Ether Inspector</h1>
-      <h4>Explore the traits of your fortress</h4>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "flex-start",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <h1>Realms Of Ether Inspector</h1>
+          <h4>Explore the traits of your fortress</h4>
+        </div>
+
+        <div
+          style={{
+            paddingLeft: "20px",
+          }}
+        >
+          <Wallet
+            address={selectedAddress}
+            connectWallet={() => connectWallet()}
+            networkError={networkError}
+            dismiss={() => setNetworkError(undefined)}
+          />
+        </div>
+      </div>
       <div style={{ height: 20 }} />
       <Container rounded title="Search">
         <Row>

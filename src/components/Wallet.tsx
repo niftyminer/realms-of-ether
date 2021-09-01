@@ -10,7 +10,19 @@ export const Wallet: FC<{
 }> = ({ connectWallet, networkError, dismiss, address }) => {
   return (
     <>
-      <button onClick={(e) => connectWallet()}>Connect Wallet</button>
+      <button
+        onClick={(e) => {
+          connectWallet();
+        }}
+        style={{
+          maxWidth: "200px",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {address ?? "Connect Wallet"}
+      </button>
 
       <div>
         {networkError && (
