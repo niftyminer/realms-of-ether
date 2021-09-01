@@ -228,10 +228,10 @@ export const App: FC = () => {
       <Container rounded title="Realms">
         <Table bordered>
           <tbody>
-            {numbers.map((x) => {
+            {rows.map((y) => {
               return (
-                <tr key={x}>
-                  {numbers.map((y) => {
+                <tr key={y}>
+                  {columns.map((x) => {
                     const fortress = metadata.find(
                       (f) => f.x === x.toString() && f.y === y.toString()
                     );
@@ -253,7 +253,7 @@ position: x: ${fortress.x} y: ${fortress.y}
                           backgroundImage:
                             fortress != null ? castle : undefined,
                         }}
-                        key={y}
+                        key={x}
                       >
                         {x === "0" && y === "0"
                           ? "Ξ"
@@ -276,7 +276,7 @@ position: x: ${fortress.x} y: ${fortress.y}
   );
 };
 
-const numbers = [
+const columns = [
   "-12",
   "-11",
   "-10",
@@ -303,3 +303,5 @@ const numbers = [
   "11",
   "12",
 ];
+
+const rows = [...columns].reverse();
