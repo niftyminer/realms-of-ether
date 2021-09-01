@@ -23,6 +23,7 @@ import {
 import { useQueryString } from "../utils/queryState";
 import { useEffect } from "react";
 import { useCallback } from "react";
+import { BigNumber } from "ethers";
 
 const castle = require("../assets/castle.png").default;
 
@@ -60,7 +61,6 @@ export const App: FC = () => {
       <h1>Realms Of Ether Inspector</h1>
       <h4>Explore the traits of your fortress</h4>
       <div style={{ height: 20 }} />
-
       <Container rounded title="Search">
         <Row>
           <Container rounded>
@@ -89,13 +89,34 @@ export const App: FC = () => {
             />
           </div>
 
-          <Button
-            primary
-            // @ts-ignore
-            onClick={displaySearchResult}
+          <div
+            style={{
+              display: "flex",
+              flex: 1,
+              flexDirection: "column",
+            }}
           >
-            Search
-          </Button>
+            <Button
+              primary
+              // @ts-ignore
+              onClick={displaySearchResult}
+            >
+              Search
+            </Button>
+            <div style={{ paddingTop: "15px", paddingLeft: "10px" }}>
+              {searchResult != null && (
+                <a
+                  href={`https://opensea.io/assets/0x8479277aacff4663aa4241085a7e27934a0b0840/${BigNumber.from(
+                    searchResult.hash
+                  ).toBigInt()}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View on OpenSea
+                </a>
+              )}
+            </div>
+          </div>
         </Row>
       </Container>
       <div style={{ height: 20 }} />

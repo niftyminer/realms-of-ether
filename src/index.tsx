@@ -43,7 +43,11 @@ ReactDOM.render(
             <div style={{ paddingLeft: 5, paddingRight: 10 }}>
               <h3>
                 Check out{" "}
-                <a href="https://opensea.io/collection/realms-of-ether-1">
+                <a
+                  href="https://opensea.io/collection/realms-of-ether-1"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   OpenSea
                 </a>{" "}
                 for fortresses
