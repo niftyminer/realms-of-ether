@@ -9,7 +9,7 @@ export const Wallet: FC<{
   address: string | undefined;
 }> = ({ connectWallet, networkError, dismiss, address }) => {
   return (
-    <>
+    <div style={{ position: "absolute", top: "10px", right: "10px" }}>
       <button
         onClick={(e) => {
           connectWallet();
@@ -29,6 +29,6 @@ export const Wallet: FC<{
           <NetworkErrorMessage message={networkError} dismiss={dismiss} />
         )}
       </div>
-    </>
+    </div>
   );
 };

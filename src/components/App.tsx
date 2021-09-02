@@ -42,6 +42,7 @@ export const App: FC = () => {
     FortressData | null | undefined
   >(null);
   const [selectedAddress, setSelectedAddress] = useState<string | undefined>();
+  const [ownerFortressHashes, setOwnerFortressHashes] = useState<string[]>([]);
   const [networkError, setNetworkError] = useState<string | undefined>();
   const [roeContract, setRoeContract] = useState<undefined | ethers.Contract>();
   const [roeWrapperContract, setRoeWrapperContract] = useState<
@@ -51,6 +52,7 @@ export const App: FC = () => {
   const resetState = useCallback(() => {
     setSelectedAddress(undefined);
     setNetworkError(undefined);
+    setOwnerFortressHashes([]);
   }, []);
 
   useEffect(() => {
@@ -81,6 +83,22 @@ export const App: FC = () => {
       new ethers.Contract(ROE_CONTRACT_ADDRESS, roeABI, provider.getSigner(0))
     );
   }, []);
+
+  useEffect(() => {
+    const func = async () => {
+      if (roeWrapperContract != null) {
+        const balance = await roeWrapperContract.balanceOf(selectedAddress);
+        const fortressHashes: string[] = [];
+        for (let ind = 0; ind < balance; ind++) {
+          const result: BigNumber =
+            await roeWrapperContract.tokenOfOwnerByIndex(selectedAddress, ind);
+          fortressHashes.push(result.toHexString());
+        }
+        setOwnerFortressHashes(fortressHashes);
+      }
+    };
+    func();
+  }, [roeWrapperContract, selectedAddress]);
 
   const initialize = useCallback(
     (userAddress: string) => {
@@ -120,37 +138,15 @@ export const App: FC = () => {
         alignItems: "center",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "flex-start",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <h1>Realms Of Ether Inspector</h1>
-          <h4>Explore the traits of your fortress</h4>
-        </div>
+      <h1>Realms Of Ether Inspector</h1>
+      <h4>Explore the traits of your fortress</h4>
 
-        <div
-          style={{
-            paddingLeft: "20px",
-          }}
-        >
-          <Wallet
-            address={selectedAddress}
-            connectWallet={() => connectWallet()}
-            networkError={networkError}
-            dismiss={() => setNetworkError(undefined)}
-          />
-        </div>
-      </div>
+      <Wallet
+        address={selectedAddress}
+        connectWallet={() => connectWallet()}
+        networkError={networkError}
+        dismiss={() => setNetworkError(undefined)}
+      />
       <div style={{ height: 20 }} />
       <Container rounded title="Search">
         <Row>
@@ -341,8 +337,11 @@ position: x: ${fortress.x} y: ${fortress.y}
                             : "Emptiness"
                         }
                         style={{
-                          backgroundImage:
-                            fortress != null ? castle : undefined,
+                          backgroundColor:
+                            fortress != null &&
+                            ownerFortressHashes.includes(fortress.hash)
+                              ? "violet"
+                              : undefined,
                         }}
                         key={x}
                       >
