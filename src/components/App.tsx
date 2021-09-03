@@ -345,14 +345,31 @@ position: x: ${fortress.x} y: ${fortress.y}
                         }}
                         key={x}
                       >
-                        {x === "0" && y === "0"
-                          ? "Ξ"
-                          : metadata.find(
-                              (f) =>
-                                f.x === x.toString() && f.y === y.toString()
-                            ) != null
-                          ? "F"
-                          : "x"}
+                        {x === "0" && y === "0" ? (
+                          "Ξ"
+                        ) : metadata.find(
+                            (f) => f.x === x.toString() && f.y === y.toString()
+                          ) != null ? (
+                          <button
+                            style={{
+                              margin: -8,
+                              border: 0,
+                              backgroundColor: "white",
+                            }}
+                            onClick={() =>
+                              window.open(
+                                `${
+                                  window.location.href.split("?")[0]
+                                }?x=${x}&y=${y}`,
+                                "_self"
+                              )
+                            }
+                          >
+                            F
+                          </button>
+                        ) : (
+                          "x"
+                        )}
                       </td>
                     );
                   })}
