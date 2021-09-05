@@ -1,7 +1,10 @@
 import qs from "query-string";
 import { useState, useCallback } from "react";
 
-export const useQueryString = (key: string, initialValue: string) => {
+export const useQueryString = (
+  key: string,
+  initialValue: string
+): [string, (v: string) => void] => {
   const [value, setValue] = useState(getQueryStringValue(key) || initialValue);
   const onSetValue = useCallback(
     (newValue) => {
@@ -34,5 +37,5 @@ const getQueryStringValue = (
   queryString = window.location.search
 ) => {
   const values = qs.parse(queryString);
-  return values[key];
+  return values[key] as string | null;
 };

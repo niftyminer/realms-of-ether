@@ -6,6 +6,7 @@ import {
   Table,
   Sprite,
   Balloon,
+  Progress,
 } from "nes-react";
 
 import { Row } from "./Row";
@@ -49,22 +50,24 @@ export const App: FC = () => {
     undefined | ethers.Contract
   >();
 
+  const [numberOfWrapped, setNumberOfWrapped] = useState<null | number>(null);
+
   const resetState = useCallback(() => {
     setSelectedAddress(undefined);
     setNetworkError(undefined);
     setOwnerFortressHashes([]);
   }, []);
 
-  useEffect(() => {
-    if (xInput !== "" && yInput !== "") {
-      displaySearchResult();
-    }
-  });
-
   const displaySearchResult = useCallback(() => {
     const f = findFortress(xInput as string, yInput as string);
     setSearchResult(f);
   }, [xInput, yInput]);
+
+  useEffect(() => {
+    if (xInput !== "" && yInput !== "") {
+      displaySearchResult();
+    }
+  }, [displaySearchResult, xInput, yInput]);
 
   const intializeEthers = useCallback(() => {
     const provider = new ethers.providers.Web3Provider(
@@ -88,13 +91,19 @@ export const App: FC = () => {
     const func = async () => {
       if (roeWrapperContract != null) {
         const balance = await roeWrapperContract.balanceOf(selectedAddress);
-        const fortressHashes: string[] = [];
+        const ownedFortressHashes: string[] = [];
+
         for (let ind = 0; ind < balance; ind++) {
           const result: BigNumber =
             await roeWrapperContract.tokenOfOwnerByIndex(selectedAddress, ind);
-          fortressHashes.push(result.toHexString());
+          ownedFortressHashes.push(result.toHexString());
         }
-        setOwnerFortressHashes(fortressHashes);
+
+        setOwnerFortressHashes(ownedFortressHashes);
+
+        const ts = await roeWrapperContract.totalSupply();
+        const totalSupply = ts.toNumber();
+        setNumberOfWrapped(totalSupply);
       }
     };
     func();
@@ -223,6 +232,9 @@ export const App: FC = () => {
           </Balloon>
         </div>
       )}
+      {numberOfWrapped != null && (
+        <h3>{`Fortresses wrapped: ${numberOfWrapped}/500`}</h3>
+      )}
       {searchResult != null && (
         <>
           <div style={{ display: "flex" }}>
@@ -313,6 +325,7 @@ export const App: FC = () => {
         </>
       )}
       <Container rounded title="Realms">
+        <Button primary>Owned</Button>
         <Table bordered>
           <tbody>
             {rows.map((y) => {
@@ -354,16 +367,19 @@ position: x: ${fortress.x} y: ${fortress.y}
                             style={{
                               margin: -8,
                               border: 0,
-                              backgroundColor: "white",
+                              backgroundColor: "transparent",
                             }}
-                            onClick={() =>
-                              window.open(
+                            onClick={() => {
+                              window.history.pushState(
+                                "",
+                                "",
                                 `${
                                   window.location.href.split("?")[0]
-                                }?x=${x}&y=${y}`,
-                                "_self"
-                              )
-                            }
+                                }?x=${x}&y=${y}`
+                              );
+                              setXInput(x);
+                              setYInput(y);
+                            }}
                           >
                             F
                           </button>
