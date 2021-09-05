@@ -51,6 +51,10 @@ export const App: FC = () => {
   >();
 
   const [numberOfWrapped, setNumberOfWrapped] = useState<null | number>(null);
+  const [showOwned, setShowOwned] = useState(true);
+  const [show2017, setShow2017] = useState(true);
+  const [show2018, setShow2018] = useState(false);
+  const [show2019, setShow2019] = useState(false);
 
   const resetState = useCallback(() => {
     setSelectedAddress(undefined);
@@ -325,7 +329,36 @@ export const App: FC = () => {
         </>
       )}
       <Container rounded title="Realms">
-        <Button primary>Owned</Button>
+        {roeWrapperContract != null && (
+          <Button
+            primary
+            // @ts-ignore
+            onClick={() => setShowOwned((value) => !value)}
+          >
+            Owned
+          </Button>
+        )}
+        <Button
+          success
+          // @ts-ignore
+          onClick={() => setShow2017((value) => !value)}
+        >
+          2017
+        </Button>
+        <Button
+          warning
+          // @ts-ignore
+          onClick={() => setShow2018((value) => !value)}
+        >
+          2018
+        </Button>
+        <Button
+          error
+          // @ts-ignore
+          onClick={() => setShow2019((value) => !value)}
+        >
+          2019
+        </Button>
         <Table bordered>
           <tbody>
             {rows.map((y) => {
@@ -350,11 +383,14 @@ position: x: ${fortress.x} y: ${fortress.y}
                             : "Emptiness"
                         }
                         style={{
-                          backgroundColor:
-                            fortress != null &&
-                            ownerFortressHashes.includes(fortress.hash)
-                              ? "violet"
-                              : undefined,
+                          backgroundColor: getColor(
+                            ownerFortressHashes,
+                            fortress,
+                            showOwned,
+                            show2017,
+                            show2018,
+                            show2019
+                          ),
                         }}
                         key={x}
                       >
@@ -397,6 +433,31 @@ position: x: ${fortress.x} y: ${fortress.y}
       </Container>
     </div>
   );
+};
+
+const getColor = (
+  ownerFortressHashes: string[],
+  fortress: FortressData | undefined,
+  showOwned: boolean,
+  show2017: boolean,
+  show2018: boolean,
+  show2019: boolean
+) => {
+  if (fortress != null) {
+    if (showOwned && ownerFortressHashes.includes(fortress.hash)) {
+      return "#2B9EEB";
+    } else if (show2017 && calculateYear(fortress.blockNumber) === 2017) {
+      return "#94CB4B";
+    } else if (show2018 && calculateYear(fortress.blockNumber) === 2018) {
+      return "#F6D439";
+    } else if (show2019 && calculateYear(fortress.blockNumber) === 2019) {
+      return "#E56F5A";
+    } else {
+      return undefined;
+    }
+  } else {
+    return undefined;
+  }
 };
 
 const columns = [
