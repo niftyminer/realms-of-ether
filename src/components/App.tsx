@@ -386,6 +386,7 @@ position: x: ${fortress.x} y: ${fortress.y}
                         }
                         style={{
                           backgroundColor: getColor(
+                            searchResult,
                             ownerFortressHashes,
                             fortress,
                             showOwned,
@@ -406,6 +407,7 @@ position: x: ${fortress.x} y: ${fortress.y}
                               margin: -8,
                               border: 0,
                               backgroundColor: "transparent",
+                              outline: "none",
                             }}
                             onClick={() => {
                               window.history.pushState(
@@ -440,6 +442,7 @@ position: x: ${fortress.x} y: ${fortress.y}
 };
 
 const getColor = (
+  searchResult: FortressData | undefined | null,
   ownerFortressHashes: string[],
   fortress: FortressData | undefined,
   showOwned: boolean,
@@ -448,7 +451,13 @@ const getColor = (
   show2019: boolean
 ) => {
   if (fortress != null) {
-    if (showOwned && ownerFortressHashes.includes(fortress.hash)) {
+    if (
+      searchResult != null &&
+      searchResult.x === fortress.x &&
+      searchResult.y === fortress.y
+    ) {
+      return "#F57722";
+    } else if (showOwned && ownerFortressHashes.includes(fortress.hash)) {
       return "#2B9EEB";
     } else if (show2017 && calculateYear(fortress.blockNumber) === 2017) {
       return "#94CB4B";
