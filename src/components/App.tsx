@@ -7,6 +7,7 @@ import {
   Sprite,
   Balloon,
   Progress,
+  Icon,
 } from "nes-react";
 
 import { Row } from "./Row";
@@ -29,6 +30,7 @@ import { Wallet } from "./Wallet";
 import { getEthereumClient } from "../utils/ethereum";
 import { roeABI } from "../contracts/RealmsOfEther";
 import { roeWrapperABI } from "../contracts/RealmsOfEtherWrapper";
+import { Donation } from "./Donation";
 
 const castle = require("../assets/castle.png").default;
 
@@ -431,6 +433,8 @@ position: x: ${fortress.x} y: ${fortress.y}
           </tbody>
         </Table>
       </Container>
+      <div style={{ height: 20 }} />
+      <Donation />
     </div>
   );
 };
