@@ -16,18 +16,6 @@ body {
   margin-right: 5px;
 }
 
-.nes-pink-button {
-  background-color: #feadcc;
-}
-
-.nes-pink-button:focus {
-  background-color: #feadcc;
-}
-
-.nes-pink-button:hover {
-  background-color: #e19cb6;
-}
-
 table td:last-child {
   width: 100%;
 }

@@ -456,7 +456,7 @@ const getColor = (
       searchResult.x === fortress.x &&
       searchResult.y === fortress.y
     ) {
-      return "#F57722";
+      return "#FEADCC";
     } else if (showOwned && ownerFortressHashes.includes(fortress.hash)) {
       return "#2B9EEB";
     } else if (show2017 && calculateYear(fortress.blockNumber) === 2017) {
