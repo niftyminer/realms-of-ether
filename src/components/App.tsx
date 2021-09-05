@@ -44,6 +44,9 @@ export const App: FC = () => {
   >(null);
   const [selectedAddress, setSelectedAddress] = useState<string | undefined>();
   const [ownerFortressHashes, setOwnerFortressHashes] = useState<string[]>([]);
+  const [wrappedFortressHashes, setWrappedFortressHashes] = useState<string[]>(
+    []
+  );
   const [networkError, setNetworkError] = useState<string | undefined>();
   const [roeContract, setRoeContract] = useState<undefined | ethers.Contract>();
   const [roeWrapperContract, setRoeWrapperContract] = useState<
@@ -51,11 +54,13 @@ export const App: FC = () => {
   >();
 
   const [numberOfWrapped, setNumberOfWrapped] = useState<null | number>(null);
+  const [progress, setProgress] = useState(0);
 
   const resetState = useCallback(() => {
     setSelectedAddress(undefined);
     setNetworkError(undefined);
     setOwnerFortressHashes([]);
+    setWrappedFortressHashes([]);
   }, []);
 
   const displaySearchResult = useCallback(() => {
@@ -104,6 +109,18 @@ export const App: FC = () => {
         const ts = await roeWrapperContract.totalSupply();
         const totalSupply = ts.toNumber();
         setNumberOfWrapped(totalSupply);
+        const fortressHashes: string[] = [];
+
+        for (let ind = 0; ind < totalSupply; ind++) {
+          const result: BigNumber = await roeWrapperContract.tokenByIndex(ind);
+          fortressHashes.push(result.toHexString());
+          console.log(fortressHashes);
+          setWrappedFortressHashes((current) => [
+            ...current,
+            result.toHexString(),
+          ]);
+          setProgress(ind);
+        }
       }
     };
     func();
@@ -232,9 +249,6 @@ export const App: FC = () => {
           </Balloon>
         </div>
       )}
-      {numberOfWrapped != null && (
-        <h3>{`Fortresses wrapped: ${numberOfWrapped}/500`}</h3>
-      )}
       {searchResult != null && (
         <>
           <div style={{ display: "flex" }}>
@@ -324,8 +338,15 @@ export const App: FC = () => {
           <div style={{ height: 20 }} />
         </>
       )}
+      {numberOfWrapped != null && (
+        <>
+          <Progress value={progress} max={numberOfWrapped} warning />
+          <div style={{ height: 20 }} />
+        </>
+      )}
       <Container rounded title="Realms">
         <Button primary>Owned</Button>
+        <Button success>Wrapped</Button>
         <Table bordered>
           <tbody>
             {rows.map((y) => {
@@ -354,6 +375,9 @@ position: x: ${fortress.x} y: ${fortress.y}
                             fortress != null &&
                             ownerFortressHashes.includes(fortress.hash)
                               ? "violet"
+                              : fortress != null &&
+                                wrappedFortressHashes.includes(fortress.hash)
+                              ? "blue"
                               : undefined,
                         }}
                         key={x}
