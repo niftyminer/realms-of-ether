@@ -12,6 +12,8 @@ import {
 
 import { Row } from "./Row";
 import {
+  calculateDistance,
+  calculateDistanceRarity,
   calculateNameRarity,
   calculateXRarity,
   calculateYear,
@@ -302,6 +304,26 @@ export const App: FC = () => {
                   <tr>
                     <td>{searchResult.y}</td>
                     <td>{calculateYRarity(searchResult.y)} has this trait</td>
+                  </tr>
+                </tbody>
+              </Table>
+              <div style={{ height: 20 }} />
+              <Table bordered>
+                <thead>
+                  <tr>
+                    <th>Distance</th>
+                    <th>Rarity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{calculateDistance(searchResult.x, searchResult.y)}</td>
+                    <td>
+                      {`${calculateDistanceRarity(
+                        searchResult.x,
+                        searchResult.y
+                      )}% has this trait`}
+                    </td>
                   </tr>
                 </tbody>
               </Table>

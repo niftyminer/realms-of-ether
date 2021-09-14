@@ -32,6 +32,16 @@ export const calculateYRarity = (y: string) => {
   return `${result / 5}%`;
 };
 
+export const calculateDistance = (x: string, y: string) => {
+  return Math.max(Math.abs(parseInt(x)), Math.abs(parseInt(y)));
+};
+
+export const calculateDistanceRarity = (x: string, y: string) => {
+  const distance = calculateDistance(x, y);
+  const fortressesAtSameDistance = 4 * 2 * distance;
+  return `${fortressesAtSameDistance / 5}`;
+};
+
 export const calculateYear = (blockNumber: number) => {
   if (blockNumber < 4826545) {
     return 2017;
