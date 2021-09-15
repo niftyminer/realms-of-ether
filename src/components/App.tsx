@@ -1,12 +1,7 @@
-import { FC, useState } from "react";
-import { Container, Button, TextInput } from "nes-react";
-
-import { Row } from "./Row";
+import { FC, useState, useEffect, useCallback } from "react";
+import { BigNumber, ethers } from "ethers";
 import { findFortress, FortressData } from "../metadata";
 import { useQueryString } from "../utils/queryState";
-import { useEffect } from "react";
-import { useCallback } from "react";
-import { BigNumber, ethers } from "ethers";
 import { Wallet } from "./Wallet";
 import { getEthereumClient } from "../utils/ethereum";
 import { roeABI } from "../contracts/RealmsOfEther";
@@ -17,6 +12,8 @@ import { Traits } from "./Traits";
 import { Realms } from "./Realms";
 import { FoundMessage } from "./FoundMessage";
 import { Search } from "./Search";
+import { Troups } from "./Troups";
+import { Buildings } from "./Buildings";
 
 const ROE_CONTRACT_ADDRESS = "0x0716d44d5991b15256A2de5769e1376D569Bba7C";
 const ROE_WRAPPER_CONTRACT_ADDRESS =
@@ -129,7 +126,7 @@ export const App: FC = () => {
         marginLeft: "auto",
         marginRight: "auto",
         marginTop: 15,
-        maxWidth: 1024,
+        maxWidth: 1200,
         alignItems: "center",
       }}
     >
@@ -168,7 +165,11 @@ export const App: FC = () => {
             }}
           >
             <Traits fortressData={searchResult} />
-            <Resources contract={roeContract} fortressData={searchResult} />
+            <div>
+              <Resources contract={roeContract} fortressData={searchResult} />
+              <Buildings contract={roeContract} fortressData={searchResult} />
+              <Troups contract={roeContract} fortressData={searchResult} />
+            </div>
             <div style={{ display: "flex", flex: 1 }} />
           </div>
           <div style={{ height: 20 }} />
