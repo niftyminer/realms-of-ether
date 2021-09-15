@@ -31,6 +31,7 @@ import { getEthereumClient } from "../utils/ethereum";
 import { roeABI } from "../contracts/RealmsOfEther";
 import { roeWrapperABI } from "../contracts/RealmsOfEtherWrapper";
 import { Donation } from "./Donation";
+import { Resources } from "./Resources";
 
 const castle = require("../assets/castle.png").default;
 
@@ -52,11 +53,6 @@ export const App: FC = () => {
     undefined | ethers.Contract
   >();
 
-  const [resources, setResources] = useState<{
-    gold: string;
-    stone: string;
-    wood: string;
-  } | null>(null);
   const [numberOfWrapped, setNumberOfWrapped] = useState<null | number>(null);
   const [showOwned, setShowOwned] = useState(true);
   const [show2017, setShow2017] = useState(true);
@@ -119,20 +115,6 @@ export const App: FC = () => {
     };
     func();
   }, [roeWrapperContract, selectedAddress]);
-
-  useEffect(() => {
-    const func = async () => {
-      if (roeContract != null && searchResult != null) {
-        const result = await roeContract.getResources(searchResult.hash);
-        setResources({
-          gold: result._gold.toString(),
-          stone: result._stone.toString(),
-          wood: result._wood.toString(),
-        });
-      }
-    };
-    func();
-  }, [searchResult, roeContract]);
 
   const initialize = useCallback(
     (userAddress: string) => {
@@ -365,34 +347,7 @@ export const App: FC = () => {
                 </tbody>
               </Table>
             </Container>
-            {resources != null && (
-              <div style={{ padding: 20 }}>
-                <Container rounded title="Resources">
-                  <Table bordered>
-                    <thead>
-                      <tr>
-                        <th>Resource</th>
-                        <th>Quantity</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Gold</td>
-                        <td>{resources.gold}</td>
-                      </tr>
-                      <tr>
-                        <td>Stone</td>
-                        <td>{resources.stone}</td>
-                      </tr>
-                      <tr>
-                        <td>Wood</td>
-                        <td>{resources.wood}</td>
-                      </tr>
-                    </tbody>
-                  </Table>
-                </Container>
-              </div>
-            )}
+            <Resources contract={roeContract} fortressData={searchResult} />
             <div style={{ display: "flex", flex: 1 }} />
           </div>
           <div style={{ height: 20 }} />
