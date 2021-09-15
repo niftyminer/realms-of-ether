@@ -1,27 +1,8 @@
 import { FC, useState } from "react";
-import {
-  Container,
-  Button,
-  TextInput,
-  Table,
-  Sprite,
-  Balloon,
-} from "nes-react";
+import { Container, Button, TextInput, Sprite, Balloon } from "nes-react";
 
 import { Row } from "./Row";
-import {
-  calculateDistance,
-  calculateDistanceRarity,
-  calculateNameRarity,
-  calculateXRarity,
-  calculateYear,
-  calculateYearRarity,
-  calculateYRarity,
-  findFortress,
-  findFortressNumber,
-  FortressData,
-  metadata,
-} from "../metadata";
+import { findFortress, findFortressNumber, FortressData } from "../metadata";
 import { useQueryString } from "../utils/queryState";
 import { useEffect } from "react";
 import { useCallback } from "react";
@@ -32,6 +13,9 @@ import { roeABI } from "../contracts/RealmsOfEther";
 import { roeWrapperABI } from "../contracts/RealmsOfEtherWrapper";
 import { Donation } from "./Donation";
 import { Resources } from "./Resources";
+import { Traits } from "./Traits";
+import { Realms } from "./Realms";
+import { FoundMessage } from "./FoundMessage";
 
 const castle = require("../assets/castle.png").default;
 
@@ -54,10 +38,6 @@ export const App: FC = () => {
   >();
 
   const [numberOfWrapped, setNumberOfWrapped] = useState<null | number>(null);
-  const [showOwned, setShowOwned] = useState(true);
-  const [show2017, setShow2017] = useState(true);
-  const [show2018, setShow2018] = useState(false);
-  const [show2019, setShow2019] = useState(false);
 
   const resetState = useCallback(() => {
     setSelectedAddress(undefined);
@@ -223,45 +203,13 @@ export const App: FC = () => {
         </Row>
       </Container>
       <div style={{ height: 20 }} />
-      {searchResult === undefined && (
-        <div style={{ display: "flex" }}>
-          <Sprite
-            sprite="kirby"
-            // @ts-ignore
-            style={{ alignSelf: "flex-end" }}
-          />
-          <Balloon
-            // @ts-ignore
-            style={{ margin: "2rem", maxWidth: "400px" }}
-            fromLeft
-          >
-            {`No such fortress found!`}
-          </Balloon>
-        </div>
-      )}
       {numberOfWrapped != null && (
         <h3>{`Fortresses wrapped: ${numberOfWrapped}/500`}</h3>
       )}
+      <FoundMessage fortressData={searchResult} />
+      <div style={{ height: 40 }} />
       {searchResult != null && (
         <>
-          <div style={{ display: "flex" }}>
-            <Sprite
-              sprite="bcrikko"
-              // @ts-ignore
-              style={{ alignSelf: "flex-end" }}
-            />
-            <Balloon
-              // @ts-ignore
-              style={{ margin: "2rem", maxWidth: "400px" }}
-              fromLeft
-            >
-              {`This is fortress #${findFortressNumber(
-                searchResult.x,
-                searchResult.y
-              )}!`}
-            </Balloon>
-          </div>
-          <div style={{ height: 40 }} />
           <div
             style={{
               display: "flex",
@@ -270,258 +218,28 @@ export const App: FC = () => {
               flexWrap: "wrap",
             }}
           >
-            <Container rounded title="Traits">
-              <Table dark bordered>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Rarity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{searchResult.name}</td>
-                    <td>
-                      {calculateNameRarity(searchResult.name)} has this trait
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
-              <div style={{ height: 20 }} />
-              <Table bordered>
-                <thead>
-                  <tr>
-                    <th>Coord</th>
-                    <th>Rarity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{searchResult.x}</td>
-                    <td>{calculateXRarity(searchResult.x)} has this trait</td>
-                  </tr>
-
-                  <tr>
-                    <td>{searchResult.y}</td>
-                    <td>{calculateYRarity(searchResult.y)} has this trait</td>
-                  </tr>
-                </tbody>
-              </Table>
-              <div style={{ height: 20 }} />
-              <Table bordered>
-                <thead>
-                  <tr>
-                    <th>Distance</th>
-                    <th>Rarity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{calculateDistance(searchResult.x, searchResult.y)}</td>
-                    <td>
-                      {`${calculateDistanceRarity(
-                        searchResult.x,
-                        searchResult.y
-                      )}% has this trait`}
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
-              <div style={{ height: 20 }} />
-              <Table bordered>
-                <thead>
-                  <tr>
-                    <th>Foundation</th>
-                    <th>Rarity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{calculateYear(searchResult.blockNumber)}</td>
-                    <td>
-                      {`${calculateYearRarity(
-                        calculateYear(searchResult.blockNumber)
-                      )}% has this trait`}
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
-            </Container>
+            <Traits fortressData={searchResult} />
             <Resources contract={roeContract} fortressData={searchResult} />
             <div style={{ display: "flex", flex: 1 }} />
           </div>
           <div style={{ height: 20 }} />
         </>
       )}
-      <Container rounded title="Realms">
-        {roeWrapperContract != null && (
-          <Button
-            primary
-            // @ts-ignore
-            onClick={() => setShowOwned((value) => !value)}
-          >
-            Owned
-          </Button>
-        )}
-        <Button
-          success
-          // @ts-ignore
-          onClick={() => setShow2017((value) => !value)}
-        >
-          2017
-        </Button>
-        <Button
-          warning
-          // @ts-ignore
-          onClick={() => setShow2018((value) => !value)}
-        >
-          2018
-        </Button>
-        <Button
-          error
-          // @ts-ignore
-          onClick={() => setShow2019((value) => !value)}
-        >
-          2019
-        </Button>
-        <Table bordered>
-          <tbody>
-            {rows.map((y) => {
-              return (
-                <tr key={y}>
-                  {columns.map((x) => {
-                    const fortress = metadata.find(
-                      (f) => f.x === x.toString() && f.y === y.toString()
-                    );
-
-                    return (
-                      <td
-                        className="tooltip"
-                        data-text={
-                          fortress != null
-                            ? `index: ${findFortressNumber(x, y)}
-name: ${fortress.name}
-position: x: ${fortress.x} y: ${fortress.y}
-`
-                            : x === "0" && y === "0"
-                            ? "Ether"
-                            : "Emptiness"
-                        }
-                        style={{
-                          backgroundColor: getColor(
-                            searchResult,
-                            ownerFortressHashes,
-                            fortress,
-                            showOwned,
-                            show2017,
-                            show2018,
-                            show2019
-                          ),
-                        }}
-                        key={x}
-                      >
-                        {x === "0" && y === "0" ? (
-                          "Ξ"
-                        ) : metadata.find(
-                            (f) => f.x === x.toString() && f.y === y.toString()
-                          ) != null ? (
-                          <button
-                            style={{
-                              margin: -8,
-                              border: 0,
-                              backgroundColor: "transparent",
-                              outline: "none",
-                            }}
-                            onClick={() => {
-                              window.history.pushState(
-                                "",
-                                "",
-                                `${
-                                  window.location.href.split("?")[0]
-                                }?x=${x}&y=${y}`
-                              );
-                              setXInput(x);
-                              setYInput(y);
-                            }}
-                          >
-                            F
-                          </button>
-                        ) : (
-                          "x"
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </Table>
-      </Container>
+      <Realms
+        fortressData={searchResult}
+        ownerHashes={ownerFortressHashes}
+        handleSelectTile={(x, y) => {
+          window.history.pushState(
+            "",
+            "",
+            `${window.location.href.split("?")[0]}?x=${x}&y=${y}`
+          );
+          setXInput(x);
+          setYInput(y);
+        }}
+      />
       <div style={{ height: 20 }} />
       <Donation />
     </div>
   );
 };
-
-const getColor = (
-  searchResult: FortressData | undefined | null,
-  ownerFortressHashes: string[],
-  fortress: FortressData | undefined,
-  showOwned: boolean,
-  show2017: boolean,
-  show2018: boolean,
-  show2019: boolean
-) => {
-  if (fortress != null) {
-    if (
-      searchResult != null &&
-      searchResult.x === fortress.x &&
-      searchResult.y === fortress.y
-    ) {
-      return "#FEADCC";
-    } else if (showOwned && ownerFortressHashes.includes(fortress.hash)) {
-      return "#2B9EEB";
-    } else if (show2017 && calculateYear(fortress.blockNumber) === 2017) {
-      return "#94CB4B";
-    } else if (show2018 && calculateYear(fortress.blockNumber) === 2018) {
-      return "#F6D439";
-    } else if (show2019 && calculateYear(fortress.blockNumber) === 2019) {
-      return "#E56F5A";
-    } else {
-      return undefined;
-    }
-  } else {
-    return undefined;
-  }
-};
-
-const columns = [
-  "-12",
-  "-11",
-  "-10",
-  "-9",
-  "-8",
-  "-7",
-  "-6",
-  "-5",
-  "-4",
-  "-3",
-  "-2",
-  "-1",
-  "0",
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "10",
-  "11",
-  "12",
-];
-
-const rows = [...columns].reverse();

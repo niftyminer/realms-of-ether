@@ -33,7 +33,7 @@ export const Resources: FC<{
     return null;
   }
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ padding: 10 }}>
       <Container rounded title="Resources">
         <Table bordered>
           <thead>
