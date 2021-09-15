@@ -1,8 +1,8 @@
 import { FC, useState } from "react";
-import { Container, Button, TextInput, Sprite, Balloon } from "nes-react";
+import { Container, Button, TextInput } from "nes-react";
 
 import { Row } from "./Row";
-import { findFortress, findFortressNumber, FortressData } from "../metadata";
+import { findFortress, FortressData } from "../metadata";
 import { useQueryString } from "../utils/queryState";
 import { useEffect } from "react";
 import { useCallback } from "react";
@@ -16,8 +16,7 @@ import { Resources } from "./Resources";
 import { Traits } from "./Traits";
 import { Realms } from "./Realms";
 import { FoundMessage } from "./FoundMessage";
-
-const castle = require("../assets/castle.png").default;
+import { Search } from "./Search";
 
 const ROE_CONTRACT_ADDRESS = "0x0716d44d5991b15256A2de5769e1376D569Bba7C";
 const ROE_WRAPPER_CONTRACT_ADDRESS =
@@ -143,69 +142,19 @@ export const App: FC = () => {
         networkError={networkError}
         dismiss={() => setNetworkError(undefined)}
       />
-      <div style={{ height: 20 }} />
-      <Container rounded title="Search">
-        <Row>
-          <Container rounded>
-            <img width={150} src={castle} alt="fortress" />
-          </Container>
-          <div
-            style={{
-              display: "flex",
-              flex: 1,
-              flexDirection: "column",
-              paddingLeft: "15px",
-              paddingRight: "15px",
-            }}
-          >
-            <TextInput
-              label="X coordinate"
-              value={xInput as string}
-              // @ts-ignore
-              onChange={(e) => setXInput(e.target.value)}
-            />
-            <TextInput
-              label="Y coordinate"
-              value={yInput as string}
-              // @ts-ignore
-              onChange={(e) => setYInput(e.target.value)}
-            />
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              flex: 1,
-              flexDirection: "column",
-            }}
-          >
-            <Button
-              primary
-              // @ts-ignore
-              onClick={displaySearchResult}
-            >
-              Search
-            </Button>
-            <div style={{ paddingTop: "15px", paddingLeft: "10px" }}>
-              {searchResult != null && (
-                <a
-                  href={`https://opensea.io/assets/0x8479277aacff4663aa4241085a7e27934a0b0840/${BigNumber.from(
-                    searchResult.hash
-                  ).toBigInt()}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  View on OpenSea
-                </a>
-              )}
-            </div>
-          </div>
-        </Row>
-      </Container>
-      <div style={{ height: 20 }} />
-      {numberOfWrapped != null && (
-        <h3>{`Fortresses wrapped: ${numberOfWrapped}/500`}</h3>
-      )}
+      <Search
+        xInput={xInput}
+        yInput={yInput}
+        setXInput={setXInput}
+        setYInput={setYInput}
+        searchResult={searchResult}
+        displaySearchResult={displaySearchResult}
+      />
+      <div style={{ padding: 10 }}>
+        {numberOfWrapped != null && (
+          <h3>{`Fortresses wrapped: ${numberOfWrapped}/500`}</h3>
+        )}
+      </div>
       <FoundMessage fortressData={searchResult} />
       <div style={{ height: 40 }} />
       {searchResult != null && (
