@@ -1,3 +1,4 @@
+import { Button } from "nes-react";
 import { FC } from "react";
 
 import { NetworkErrorMessage } from "./NetworkErrorMessage";
@@ -9,20 +10,20 @@ export const Wallet: FC<{
   address: string | undefined;
 }> = ({ connectWallet, networkError, dismiss, address }) => {
   return (
-    <div style={{ position: "absolute", top: "10px", right: "10px" }}>
-      <button
+    <div>
+      <Button
+        // @ts-ignore
         onClick={(e) => {
           connectWallet();
         }}
         style={{
-          maxWidth: "200px",
-          overflow: "hidden",
+          maxWidth: "300px",
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
         }}
       >
         {address ?? "Connect Wallet"}
-      </button>
+      </Button>
 
       <div>
         {networkError && (

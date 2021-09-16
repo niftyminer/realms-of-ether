@@ -6,7 +6,6 @@ import { Wallet } from "./Wallet";
 import { getEthereumClient } from "../utils/ethereum";
 import { roeABI } from "../contracts/RealmsOfEther";
 import { roeWrapperABI } from "../contracts/RealmsOfEtherWrapper";
-import { Donation } from "./Donation";
 import { Resources } from "./Resources";
 import { Traits } from "./Traits";
 import { Realms } from "./Realms";
@@ -14,6 +13,7 @@ import { FoundMessage } from "./FoundMessage";
 import { Search } from "./Search";
 import { Troups } from "./Troups";
 import { Buildings } from "./Buildings";
+import { Button } from "nes-react";
 
 const ROE_CONTRACT_ADDRESS = "0x0716d44d5991b15256A2de5769e1376D569Bba7C";
 const ROE_WRAPPER_CONTRACT_ADDRESS =
@@ -130,15 +130,26 @@ export const App: FC = () => {
         alignItems: "center",
       }}
     >
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          flexDirection: "row",
+          justifyContent: "flex-end",
+          paddingBottom: 15,
+        }}
+      >
+        <Button>Learn</Button>
+        <Wallet
+          address={selectedAddress}
+          connectWallet={() => connectWallet()}
+          networkError={networkError}
+          dismiss={() => setNetworkError(undefined)}
+        />
+      </div>
       <h1>Realms Of Ether Inspector</h1>
       <h4>Explore the traits of your fortress</h4>
 
-      <Wallet
-        address={selectedAddress}
-        connectWallet={() => connectWallet()}
-        networkError={networkError}
-        dismiss={() => setNetworkError(undefined)}
-      />
       <Search
         xInput={xInput}
         yInput={yInput}
@@ -188,8 +199,6 @@ export const App: FC = () => {
           setYInput(y);
         }}
       />
-      <div style={{ height: 20 }} />
-      <Donation />
     </div>
   );
 };

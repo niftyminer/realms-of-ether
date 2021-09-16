@@ -2,6 +2,7 @@ import { Container, Icon } from "nes-react";
 import React from "react";
 import ReactDOM from "react-dom";
 import { App } from "./components/App";
+import { Donation } from "./components/Donation";
 
 import "./index.css";
 
@@ -17,12 +18,13 @@ ReactDOM.render(
       }}
     >
       <App />
+      <Donation />
       <div
         style={{
           display: "flex",
           flex: 1,
           flexShrink: 0,
-          paddingTop: 50,
+          paddingTop: 20,
           paddingBottom: 20,
           alignItems: "center",
           maxWidth: 1024,
