@@ -18,11 +18,17 @@ export const Wallet: FC<{
         }}
         style={{
           maxWidth: "300px",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
         }}
       >
-        {address ?? "Connect Wallet"}
+        <div
+          style={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {address ?? "Connect Wallet"}
+        </div>
       </Button>
 
       <div>

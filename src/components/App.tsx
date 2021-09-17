@@ -1,56 +1,31 @@
-import { FC, useState, useEffect, useCallback } from "react";
-import { BigNumber, ethers } from "ethers";
-import { findFortress, FortressData } from "../metadata";
-import { useQueryString } from "../utils/queryState";
+import { FC, useState, useCallback } from "react";
+import { ethers } from "ethers";
+import { Switch, Route, NavLink } from "react-router-dom";
+
 import { Wallet } from "./Wallet";
 import { getEthereumClient } from "../utils/ethereum";
 import { roeABI } from "../contracts/RealmsOfEther";
 import { roeWrapperABI } from "../contracts/RealmsOfEtherWrapper";
-import { Resources } from "./Resources";
-import { Traits } from "./Traits";
-import { Realms } from "./Realms";
-import { FoundMessage } from "./FoundMessage";
-import { Search } from "./Search";
-import { Troups } from "./Troups";
-import { Buildings } from "./Buildings";
-import { Button } from "nes-react";
+import { Button, Container, Icon } from "nes-react";
+import { Inspector } from "../pages/Inspector";
+import { Learn } from "../pages/Learn";
+import { Donation } from "./Donation";
 
 const ROE_CONTRACT_ADDRESS = "0x0716d44d5991b15256A2de5769e1376D569Bba7C";
 const ROE_WRAPPER_CONTRACT_ADDRESS =
   "0x8479277AaCFF4663Aa4241085a7E27934A0b0840";
 
 export const App: FC = () => {
-  const [xInput, setXInput] = useQueryString("x", "");
-  const [yInput, setYInput] = useQueryString("y", "");
-  const [searchResult, setSearchResult] = useState<
-    FortressData | null | undefined
-  >(null);
   const [selectedAddress, setSelectedAddress] = useState<string | undefined>();
-  const [ownerFortressHashes, setOwnerFortressHashes] = useState<string[]>([]);
   const [networkError, setNetworkError] = useState<string | undefined>();
   const [roeContract, setRoeContract] = useState<undefined | ethers.Contract>();
   const [roeWrapperContract, setRoeWrapperContract] = useState<
     undefined | ethers.Contract
   >();
-
-  const [numberOfWrapped, setNumberOfWrapped] = useState<null | number>(null);
-
   const resetState = useCallback(() => {
     setSelectedAddress(undefined);
     setNetworkError(undefined);
-    setOwnerFortressHashes([]);
   }, []);
-
-  const displaySearchResult = useCallback(() => {
-    const f = findFortress(xInput as string, yInput as string);
-    setSearchResult(f);
-  }, [xInput, yInput]);
-
-  useEffect(() => {
-    if (xInput !== "" && yInput !== "") {
-      displaySearchResult();
-    }
-  }, [displaySearchResult, xInput, yInput]);
 
   const intializeEthers = useCallback(() => {
     const provider = new ethers.providers.Web3Provider(
@@ -69,28 +44,6 @@ export const App: FC = () => {
       new ethers.Contract(ROE_CONTRACT_ADDRESS, roeABI, provider.getSigner(0))
     );
   }, []);
-
-  useEffect(() => {
-    const func = async () => {
-      if (roeWrapperContract != null) {
-        const balance = await roeWrapperContract.balanceOf(selectedAddress);
-        const ownedFortressHashes: string[] = [];
-
-        for (let ind = 0; ind < balance; ind++) {
-          const result: BigNumber =
-            await roeWrapperContract.tokenOfOwnerByIndex(selectedAddress, ind);
-          ownedFortressHashes.push(result.toHexString());
-        }
-
-        setOwnerFortressHashes(ownedFortressHashes);
-
-        const ts = await roeWrapperContract.totalSupply();
-        const totalSupply = ts.toNumber();
-        setNumberOfWrapped(totalSupply);
-      }
-    };
-    func();
-  }, [roeWrapperContract, selectedAddress]);
 
   const initialize = useCallback(
     (userAddress: string) => {
@@ -120,13 +73,10 @@ export const App: FC = () => {
   return (
     <div
       style={{
+        width: "100vw",
+        height: "100vh",
         display: "flex",
         flexDirection: "column",
-        flex: "1 0 auto",
-        marginLeft: "auto",
-        marginRight: "auto",
-        marginTop: 15,
-        maxWidth: 1200,
         alignItems: "center",
       }}
     >
@@ -136,69 +86,99 @@ export const App: FC = () => {
           width: "100%",
           flexDirection: "row",
           justifyContent: "flex-end",
+          alignItems: "center",
           paddingBottom: 15,
         }}
       >
-        <Button>Learn</Button>
-        <Wallet
-          address={selectedAddress}
-          connectWallet={() => connectWallet()}
-          networkError={networkError}
-          dismiss={() => setNetworkError(undefined)}
-        />
-      </div>
-      <h1>Realms Of Ether Inspector</h1>
-      <h4>Explore the traits of your fortress</h4>
-
-      <Search
-        xInput={xInput}
-        yInput={yInput}
-        setXInput={setXInput}
-        setYInput={setYInput}
-        searchResult={searchResult}
-        displaySearchResult={displaySearchResult}
-      />
-      <div style={{ padding: 10 }}>
-        {numberOfWrapped != null && (
-          <h3>{`Fortresses wrapped: ${numberOfWrapped}/500`}</h3>
-        )}
-      </div>
-      <FoundMessage fortressData={searchResult} />
-      <div style={{ height: 40 }} />
-      {searchResult != null && (
-        <>
-          <div
-            style={{
-              display: "flex",
-              flex: 1,
-              flexDirection: "row",
-              flexWrap: "wrap",
-            }}
+        <NavLink to="/" style={{ textDecoration: "none", color: "black" }}>
+          <h1>Realms Of Ether Inspector</h1>
+        </NavLink>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <NavLink
+            to="/learn"
+            style={{ textDecoration: "none", color: "black" }}
           >
-            <Traits fortressData={searchResult} />
-            <div>
-              <Resources contract={roeContract} fortressData={searchResult} />
-              <Buildings contract={roeContract} fortressData={searchResult} />
-              <Troups contract={roeContract} fortressData={searchResult} />
-            </div>
-            <div style={{ display: "flex", flex: 1 }} />
-          </div>
-          <div style={{ height: 20 }} />
-        </>
-      )}
-      <Realms
-        fortressData={searchResult}
-        ownerHashes={ownerFortressHashes}
-        handleSelectTile={(x, y) => {
-          window.history.pushState(
-            "",
-            "",
-            `${window.location.href.split("?")[0]}?x=${x}&y=${y}`
-          );
-          setXInput(x);
-          setYInput(y);
+            <Button>Learn</Button>
+          </NavLink>
+          <Wallet
+            address={selectedAddress}
+            connectWallet={() => connectWallet()}
+            networkError={networkError}
+            dismiss={() => setNetworkError(undefined)}
+          />
+        </div>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          flex: "1 0 auto",
+          marginLeft: "auto",
+          marginRight: "auto",
+          marginTop: 15,
+          maxWidth: "95%",
+          alignItems: "center",
         }}
-      />
+      >
+        <Switch>
+          <Route path="/learn">
+            <Learn />
+          </Route>
+          <Route path="/">
+            <Inspector
+              selectedAddress={selectedAddress}
+              roeContract={roeContract}
+              roeWrapperContract={roeWrapperContract}
+            />
+          </Route>
+        </Switch>
+      </div>
+      <Donation />
+      <div
+        style={{
+          display: "flex",
+          flex: 1,
+          flexShrink: 0,
+          paddingTop: 20,
+          paddingBottom: 20,
+          alignItems: "center",
+          maxWidth: 1200,
+        }}
+      >
+        <Container title="Credits" rounded>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <h3>nifty_miner</h3>
+            <div style={{ paddingLeft: 10, paddingRight: 10 }}>
+              <a
+                href="https://twitter.com/nifty_miner"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Icon icon={"twitter"} />
+              </a>
+            </div>
+            <div style={{ paddingLeft: 5, paddingRight: 10 }}>
+              <h3>
+                Check out{" "}
+                <a
+                  href="https://opensea.io/collection/realms-of-ether-1"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  OpenSea
+                </a>{" "}
+                for fortresses
+              </h3>
+            </div>
+          </div>
+        </Container>
+      </div>
     </div>
   );
 };
