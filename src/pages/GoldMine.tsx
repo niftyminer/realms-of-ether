@@ -123,8 +123,14 @@ export const GoldMine: FC<{
   }, [roeWrapperContract, selectedAddress]);
 
   const requestApproval = async () => {
-    await roeWrapperContract?.setApprovalForAll(GOLD_CONTRACT_ADDRESS, true);
-    setApproved(true);
+    if (roeWrapperContract != null) {
+      const tx = await roeWrapperContract?.setApprovalForAll(
+        GOLD_CONTRACT_ADDRESS,
+        true
+      );
+      await tx.wait();
+      setApproved(true);
+    }
   };
 
   const startStaking = async () => {
@@ -150,7 +156,7 @@ export const GoldMine: FC<{
   };
 
   const unstakeAll = async () => {
-    await goldContract?.unstakeByIds([stakedIds]);
+    await goldContract?.unstakeByIds(stakedIds);
     setStakedIds([]);
   };
 
@@ -198,101 +204,107 @@ export const GoldMine: FC<{
             </Button>
           )}
         </div>
-        <div style={{ paddingBottom: 30 }}>
-          <Container rounded title="Stake">
-            <Row>
-              <Container rounded>
-                <img width={150} src={castle} alt="fortress" />
-              </Container>
-              <div
-                style={{
-                  paddingLeft: "15px",
-                  paddingRight: "15px",
-                }}
-              >
-                {Object.entries(fortressIds).map(([id, value]) => {
-                  // const fortress = metadata.find((data) => data.hash === id);
-                  return (
-                    <Checkbox
-                      key={id}
-                      checked={value}
-                      //  label={`x: ${fortress?.x} y: ${fortress?.y}`}
-                      label={`name: ${id}`}
-                      onSelect={async () => {
-                        const owner = await roeWrapperContract?.ownerOf(id);
-                        console.log("owner", owner);
-                        setFortressIds({ ...fortressIds, [id]: !value });
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            </Row>
-            <Button
-              success
-              // @ts-ignore
-              onClick={startStaking}
-            >
-              Start Earning
-            </Button>
-          </Container>
-        </div>
-        <Container rounded title="Dashboard">
-          <div style={{ paddingBottom: 20 }}>
-            <Table bordered>
-              <tbody style={{ whiteSpace: "nowrap" }}>
-                <tr>
-                  <td>Gold balance</td>
-                  <td>
-                    <div style={{ display: "flex", flexWrap: "nowrap" }}>
-                      {limitDecimals(formatEther(goldBalance))}{" "}
-                      <img width={20} src={gold} alt="gold" />
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
-          </div>
-          <Table bordered>
-            <thead style={{ whiteSpace: "nowrap" }}>
-              <tr>
-                <th>Fortresses</th>
-                <th>Rewards</th>
-                <th>Claim All</th>
-                <th>Unstake All</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>{stakedIds.length}</td>
-                <td>
-                  <div style={{ display: "flex", flexWrap: "nowrap" }}>
-                    {limitDecimals(rewards)}{" "}
-                    <img width={20} src={gold} alt="gold" />
+        {approved && (
+          <>
+            <div style={{ paddingBottom: 30 }}>
+              <Container rounded title="Stake">
+                <Row>
+                  <Container rounded>
+                    <img width={150} src={castle} alt="fortress" />
+                  </Container>
+                  <div
+                    style={{
+                      paddingLeft: "15px",
+                      paddingRight: "15px",
+                    }}
+                  >
+                    {Object.entries(fortressIds).map(([id, value]) => {
+                      // const fortress = metadata.find((data) => data.hash === id);
+                      return (
+                        <Checkbox
+                          key={id}
+                          checked={value}
+                          //  label={`x: ${fortress?.x} y: ${fortress?.y}`}
+                          label={`name: ${id}`}
+                          onSelect={async () => {
+                            const owner = await roeWrapperContract?.ownerOf(id);
+                            console.log("owner", owner);
+                            setFortressIds({ ...fortressIds, [id]: !value });
+                          }}
+                        />
+                      );
+                    })}
                   </div>
-                </td>
-                <td>
-                  <Button
-                    primary
-                    // @ts-ignore
-                    onClick={claimRewards}
-                  >
-                    Claim
-                  </Button>
-                </td>
-                <td>
-                  <Button
-                    error
-                    // @ts-ignore
-                    onClick={unstakeAll}
-                  >
-                    Unstake
-                  </Button>
-                </td>
-              </tr>
-            </tbody>
-          </Table>
-          {/* <Container rounded title="Details">
+                </Row>
+                <Button
+                  success
+                  disabled={
+                    Object.values(fortressIds).filter((v) => v === true)
+                      .length === 0
+                  }
+                  // @ts-ignore
+                  onClick={startStaking}
+                >
+                  Start Earning
+                </Button>
+              </Container>
+            </div>
+            <Container rounded title="Dashboard">
+              <div style={{ paddingBottom: 20 }}>
+                <Table bordered>
+                  <tbody style={{ whiteSpace: "nowrap" }}>
+                    <tr>
+                      <td>Gold balance</td>
+                      <td>
+                        <div style={{ display: "flex", flexWrap: "nowrap" }}>
+                          {limitDecimals(formatEther(goldBalance))}{" "}
+                          <img width={20} src={gold} alt="gold" />
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </div>
+              <Table bordered>
+                <thead style={{ whiteSpace: "nowrap" }}>
+                  <tr>
+                    <th>Fortresses</th>
+                    <th>Rewards</th>
+                    <th>Claim All</th>
+                    <th>Unstake All</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{stakedIds.length}</td>
+                    <td>
+                      <div style={{ display: "flex", flexWrap: "nowrap" }}>
+                        {limitDecimals(rewards)}{" "}
+                        <img width={20} src={gold} alt="gold" />
+                      </div>
+                    </td>
+                    <td>
+                      <Button
+                        primary
+                        // @ts-ignore
+                        onClick={claimRewards}
+                      >
+                        Claim
+                      </Button>
+                    </td>
+                    <td>
+                      <Button
+                        error
+                        // @ts-ignore
+                        onClick={unstakeAll}
+                      >
+                        Unstake
+                      </Button>
+                    </td>
+                  </tr>
+                </tbody>
+              </Table>
+              {/* <Container rounded title="Details">
             <Table bordered>
               <thead style={{ whiteSpace: "nowrap" }}>
                 <tr>
@@ -330,8 +342,10 @@ export const GoldMine: FC<{
               </tbody>
             </Table>
           </Container> */}
-          <div style={{ height: 20 }} />
-        </Container>
+              <div style={{ height: 20 }} />
+            </Container>
+          </>
+        )}
         <div style={{ paddingTop: 30 }}>
           <h5 style={{ textAlign: "center" }}>
             Disclaimer: this is a community project, built for the kings and
