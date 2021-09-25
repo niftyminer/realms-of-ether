@@ -9,6 +9,7 @@ import { roeWrapperABI } from "../contracts/RealmsOfEtherWrapper";
 import { Button, Container, Icon } from "nes-react";
 import { Inspector } from "../pages/Inspector";
 import { Learn } from "../pages/Learn";
+import { GoldMine } from "../pages/GoldMine";
 import { Donation } from "./Donation";
 
 const ROE_CONTRACT_ADDRESS = "0x0716d44d5991b15256A2de5769e1376D569Bba7C";
@@ -129,6 +130,13 @@ export const App: FC = () => {
         <Switch>
           <Route path="/learn">
             <Learn />
+          </Route>
+          <Route path="/goldmine">
+            <GoldMine
+              selectedAddress={selectedAddress}
+              roeContract={roeContract}
+              roeWrapperContract={roeWrapperContract}
+            />
           </Route>
           <Route path="/">
             <Inspector
