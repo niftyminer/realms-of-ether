@@ -1,25 +1,157 @@
-import { FC, useState } from "react";
-import { Contract } from "ethers";
-import { Button, Container, List, Table, TextInput } from "nes-react";
+import { FC, useEffect, useState } from "react";
+import { BigNumber, constants, Contract, Event } from "ethers";
+import { Button, Checkbox, Container, Table } from "nes-react";
 import { Row } from "../components/Row";
+import { metadata } from "../metadata";
+import { GOLD_CONTRACT_ADDRESS } from "../addresses";
+import { formatEther } from "@ethersproject/units";
 
 const gold = require("../assets/gold.png").default;
 const castle = require("../assets/castle.png").default;
 
 export const GoldMine: FC<{
   selectedAddress: string | undefined;
-  roeContract: Contract | undefined;
+  goldContract: Contract | undefined;
   roeWrapperContract: Contract | undefined;
-}> = ({ selectedAddress, roeContract, roeWrapperContract }) => {
-  const [id, setId] = useState("");
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+}> = ({ selectedAddress, goldContract, roeWrapperContract }) => {
   const [approved, setApproved] = useState(false);
+  const [rewards, setRewards] = useState("0");
+  const [goldBalance, setGoldBalance] = useState("0");
+  const [fortressIds, setFortressIds] = useState<Record<string, boolean>>({});
+  const [stakedIds, setStakedIds] = useState<BigNumber[]>([]);
 
-  const updateSelectedIds = () => {
-    if (id !== "" && !selectedIds.includes(id)) {
-      setSelectedIds([...selectedIds, id]);
-      setId("");
+  // gold balance
+  useEffect(() => {
+    const func = async () => {
+      if (goldContract != null) {
+        const balance: BigNumber = await goldContract.balanceOf(
+          selectedAddress
+        );
+        console.log("gold balance", balance);
+        setGoldBalance(balance.toString());
+      }
+    };
+    func();
+  }, [goldContract, selectedAddress, rewards]);
+
+  // setFortresses
+  useEffect(() => {
+    const func = async () => {
+      if (roeWrapperContract != null) {
+        const balance = await roeWrapperContract.balanceOf(selectedAddress);
+        const fortressIds: Record<string, boolean> = {};
+
+        for (let ind = 0; ind < balance; ind++) {
+          const result: BigNumber =
+            await roeWrapperContract.tokenOfOwnerByIndex(selectedAddress, ind);
+          fortressIds[result.toHexString()] = false;
+        }
+        setFortressIds(fortressIds);
+      }
+    };
+    func();
+  }, [roeWrapperContract, selectedAddress, stakedIds]);
+
+  // setStakeIds
+  useEffect(() => {
+    const func = async () => {
+      if (goldContract != null) {
+        goldContract.on(
+          goldContract.filters.FortressStaked(),
+          async (id: BigNumber) => {
+            const staker = (await goldContract.getStaker(id)).toLowerCase();
+            if (staker === selectedAddress) {
+              setStakedIds((currentValue) => [...currentValue, id]);
+            }
+          }
+        );
+        const eventFilter = goldContract.filters.FortressStaked();
+        const events = await goldContract.queryFilter(eventFilter);
+        console.log(events);
+        const allStakedIds = events.map((e: Event) => e?.args?.[0]);
+        const stakedForSelectedAddress: BigNumber[] = [];
+        for (const id of allStakedIds) {
+          const staker = (await goldContract.getStaker(id)).toLowerCase();
+          console.log("staker", staker);
+          console.log("selectedAddress", selectedAddress);
+          if (staker === selectedAddress) {
+            stakedForSelectedAddress.push(id);
+          }
+        }
+        setStakedIds(stakedForSelectedAddress);
+      }
+    };
+    func();
+
+    return () => {
+      goldContract?.removeAllListeners();
+    };
+  }, [goldContract, selectedAddress]);
+
+  useEffect(() => {
+    console.log(stakedIds);
+  }, [stakedIds]);
+
+  // rewards
+  useEffect(() => {
+    const func = async () => {
+      if (goldContract != null) {
+        let sum = constants.Zero;
+        for (const stakedId of stakedIds) {
+          const reward = await goldContract.getRewardsByTokenId(stakedId);
+          sum = sum.add(reward);
+        }
+        setRewards(formatEther(sum));
+      }
+    };
+    func();
+  }, [goldContract, selectedAddress, stakedIds]);
+
+  // isApproved
+  useEffect(() => {
+    const func = async () => {
+      if (roeWrapperContract != null) {
+        const isApproved = await roeWrapperContract.isApprovedForAll(
+          selectedAddress,
+          GOLD_CONTRACT_ADDRESS
+        );
+        console.log("isapproved", isApproved);
+        setApproved(isApproved);
+      }
+    };
+    func();
+  }, [roeWrapperContract, selectedAddress]);
+
+  const requestApproval = async () => {
+    await roeWrapperContract?.setApprovalForAll(GOLD_CONTRACT_ADDRESS, true);
+    setApproved(true);
+  };
+
+  const startStaking = async () => {
+    const idsToStake = Object.entries(fortressIds)
+      .filter(([_key, value]) => value === true)
+      .map(([key, _value]) => key);
+    console.log(idsToStake);
+    await goldContract?.stakeByIds(idsToStake);
+    const updatedState = { ...fortressIds };
+    for (const idToStake of idsToStake) {
+      delete updatedState[idToStake];
     }
+    setFortressIds(updatedState);
+  };
+
+  const claimRewards = async () => {
+    console.log(stakedIds);
+    const tx = await goldContract?.claimByTokenIds(
+      stakedIds.map((id) => id.toHexString())
+    );
+    await tx.wait();
+    setRewards("0");
+  };
+
+  const unstakeAll = async () => {
+    await goldContract?.unstakeByIds([stakedIds]);
+    setStakedIds([]);
   };
 
   return (
@@ -60,13 +192,13 @@ export const GoldMine: FC<{
             <Button
               warning
               // @ts-ignore
-              onClick={() => setApproved(true)}
+              onClick={requestApproval}
             >
-              Allow me to take care of your fortress
+              Allow the Gold Mine to handle your fortress
             </Button>
           )}
         </div>
-        <div>
+        <div style={{ paddingBottom: 30 }}>
           <Container rounded title="Stake">
             <Row>
               <Container rounded>
@@ -78,66 +210,89 @@ export const GoldMine: FC<{
                   paddingRight: "15px",
                 }}
               >
-                <TextInput
-                  label="Fortress ID"
-                  value={id}
-                  // @ts-ignore
-                  onChange={(e) => setId(e.target.value)}
-                />
-                <Button
-                  primary
-                  // @ts-ignore
-                  onClick={updateSelectedIds}
-                >
-                  Add
-                </Button>
+                {Object.entries(fortressIds).map(([id, value]) => {
+                  // const fortress = metadata.find((data) => data.hash === id);
+                  return (
+                    <Checkbox
+                      key={id}
+                      checked={value}
+                      //  label={`x: ${fortress?.x} y: ${fortress?.y}`}
+                      label={`name: ${id}`}
+                      onSelect={async () => {
+                        const owner = await roeWrapperContract?.ownerOf(id);
+                        console.log("owner", owner);
+                        setFortressIds({ ...fortressIds, [id]: !value });
+                      }}
+                    />
+                  );
+                })}
               </div>
             </Row>
-            <List solid>
-              {selectedIds.map((selectedId) => (
-                <li>{selectedId}</li>
-              ))}
-            </List>
+            <Button
+              success
+              // @ts-ignore
+              onClick={startStaking}
+            >
+              Start Earning
+            </Button>
           </Container>
         </div>
-        <div style={{ padding: 30 }}>
-          <Button
-            success
-            // @ts-ignore
-            onClick={() => setApproved(true)}
-          >
-            Start Earning
-          </Button>
-        </div>
         <Container rounded title="Dashboard">
-          <Container rounded title="Overview">
+          <div style={{ paddingBottom: 20 }}>
             <Table bordered>
-              <thead style={{ whiteSpace: "nowrap" }}>
+              <tbody style={{ whiteSpace: "nowrap" }}>
                 <tr>
-                  <th>Fortresses</th>
-                  <th>Rewards</th>
-                  <th>Collect All</th>
-                  <th>Unstake All</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>4</td>
+                  <td>Gold balance</td>
                   <td>
-                    452 <img width={20} src={gold} alt="gold" />
-                  </td>
-                  <td>
-                    <Button primary>Collect</Button>
-                  </td>
-                  <td>
-                    <Button error>Unstake</Button>
+                    <div style={{ display: "flex", flexWrap: "nowrap" }}>
+                      {limitDecimals(formatEther(goldBalance))}{" "}
+                      <img width={20} src={gold} alt="gold" />
+                    </div>
                   </td>
                 </tr>
               </tbody>
             </Table>
-          </Container>
-          <div style={{ height: 20 }} />
-          <Container rounded title="Details">
+          </div>
+          <Table bordered>
+            <thead style={{ whiteSpace: "nowrap" }}>
+              <tr>
+                <th>Fortresses</th>
+                <th>Rewards</th>
+                <th>Claim All</th>
+                <th>Unstake All</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{stakedIds.length}</td>
+                <td>
+                  <div style={{ display: "flex", flexWrap: "nowrap" }}>
+                    {limitDecimals(rewards)}{" "}
+                    <img width={20} src={gold} alt="gold" />
+                  </div>
+                </td>
+                <td>
+                  <Button
+                    primary
+                    // @ts-ignore
+                    onClick={claimRewards}
+                  >
+                    Claim
+                  </Button>
+                </td>
+                <td>
+                  <Button
+                    error
+                    // @ts-ignore
+                    onClick={unstakeAll}
+                  >
+                    Unstake
+                  </Button>
+                </td>
+              </tr>
+            </tbody>
+          </Table>
+          {/* <Container rounded title="Details">
             <Table bordered>
               <thead style={{ whiteSpace: "nowrap" }}>
                 <tr>
@@ -174,7 +329,7 @@ export const GoldMine: FC<{
                 </tr>
               </tbody>
             </Table>
-          </Container>
+          </Container> */}
           <div style={{ height: 20 }} />
         </Container>
         <div style={{ paddingTop: 30 }}>
@@ -187,4 +342,13 @@ export const GoldMine: FC<{
       </div>
     </>
   );
+};
+
+const limitDecimals = (str: string) => {
+  if (str.includes(".")) {
+    const parts = str.split(".");
+    return parts[0] + "." + parts[1].slice(0, 5);
+  } else {
+    return str;
+  }
 };

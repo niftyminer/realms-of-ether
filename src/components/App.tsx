@@ -6,21 +6,31 @@ import { Wallet } from "./Wallet";
 import { getEthereumClient } from "../utils/ethereum";
 import { roeABI } from "../contracts/RealmsOfEther";
 import { roeWrapperABI } from "../contracts/RealmsOfEtherWrapper";
+import { goldABI } from "../contracts/Gold";
 import { Button, Container, Icon } from "nes-react";
 import { Inspector } from "../pages/Inspector";
 import { Learn } from "../pages/Learn";
 import { GoldMine } from "../pages/GoldMine";
 import { Donation } from "./Donation";
-
-const ROE_CONTRACT_ADDRESS = "0x0716d44d5991b15256A2de5769e1376D569Bba7C";
-const ROE_WRAPPER_CONTRACT_ADDRESS =
-  "0x8479277AaCFF4663Aa4241085a7E27934A0b0840";
+import {
+  GOLD_CONTRACT_ADDRESS,
+  OPENSEA_RINKEBY_CREATURES,
+  ROE_CONTRACT_ADDRESS,
+  ROE_WRAPPER_CONTRACT_ADDRESS,
+} from "../addresses";
+import { seaCreaturesABI } from "../contracts/SeaCreatures";
 
 export const App: FC = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | undefined>();
   const [networkError, setNetworkError] = useState<string | undefined>();
   const [roeContract, setRoeContract] = useState<undefined | ethers.Contract>();
   const [roeWrapperContract, setRoeWrapperContract] = useState<
+    undefined | ethers.Contract
+  >();
+  const [creaturesRinkebyContract, setCreaturesRinkebyContract] = useState<
+    undefined | ethers.Contract
+  >();
+  const [goldContract, setGoldContract] = useState<
     undefined | ethers.Contract
   >();
   const resetState = useCallback(() => {
@@ -43,6 +53,16 @@ export const App: FC = () => {
     );
     setRoeContract(
       new ethers.Contract(ROE_CONTRACT_ADDRESS, roeABI, provider.getSigner(0))
+    );
+    setGoldContract(
+      new ethers.Contract(GOLD_CONTRACT_ADDRESS, goldABI, provider.getSigner(0))
+    );
+    setCreaturesRinkebyContract(
+      new ethers.Contract(
+        OPENSEA_RINKEBY_CREATURES,
+        seaCreaturesABI,
+        provider.getSigner(0)
+      )
     );
   }, []);
 
@@ -134,8 +154,8 @@ export const App: FC = () => {
           <Route path="/goldmine">
             <GoldMine
               selectedAddress={selectedAddress}
-              roeContract={roeContract}
-              roeWrapperContract={roeWrapperContract}
+              goldContract={goldContract}
+              roeWrapperContract={creaturesRinkebyContract}
             />
           </Route>
           <Route path="/">
