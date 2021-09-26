@@ -71,6 +71,34 @@ export const FAQ: FC = () => {
           style={{ margin: "2rem", maxWidth: "500px" }}
           fromLeft
         >
+          {`Are any integrations planned for GOLD?`}
+        </Balloon>
+      </div>
+      <div style={{ display: "flex" }}>
+        <Balloon
+          // @ts-ignore
+          style={{ margin: "2rem", maxWidth: "400px" }}
+          fromRight
+        >
+          {`GOLD is intended to be used elsewhere in the metaverse, and integrations are being pursued.`}
+        </Balloon>
+        <Sprite
+          sprite="bcrikko"
+          // @ts-ignore
+          style={{ alignSelf: "flex-end" }}
+        />
+      </div>
+      <div style={{ display: "flex" }}>
+        <Sprite
+          sprite="kirby"
+          // @ts-ignore
+          style={{ alignSelf: "flex-end" }}
+        />
+        <Balloon
+          // @ts-ignore
+          style={{ margin: "2rem", maxWidth: "500px" }}
+          fromLeft
+        >
           {`How much GOLD are we talking about?`}
         </Balloon>
       </div>

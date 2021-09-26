@@ -76,7 +76,6 @@ export const GoldMine: FC<{
         );
         const eventFilter = goldContract.filters.FortressStaked();
         const events = await goldContract.queryFilter(eventFilter);
-        console.log(events);
         const allStakedIds = events.map((e: Event) => e?.args?.[0]);
         const stakedForSelectedAddress: BigNumber[] = [];
         for (const id of allStakedIds) {
@@ -97,10 +96,6 @@ export const GoldMine: FC<{
       goldContract?.removeAllListeners();
     };
   }, [goldContract, selectedAddress]);
-
-  useEffect(() => {
-    console.log(stakedIds);
-  }, [stakedIds]);
 
   // gold supply
   useEffect(() => {
@@ -140,7 +135,6 @@ export const GoldMine: FC<{
           selectedAddress,
           GOLD_CONTRACT_ADDRESS
         );
-        console.log("isapproved", isApproved);
         setApproved(isApproved);
       }
     };
@@ -162,7 +156,7 @@ export const GoldMine: FC<{
     const idsToStake = Object.entries(fortressIds)
       .filter(([_key, value]) => value === true)
       .map(([key, _value]) => key);
-    console.log(idsToStake);
+
     await goldContract?.stakeByIds(idsToStake);
     const updatedState = { ...fortressIds };
     for (const idToStake of idsToStake) {
@@ -172,7 +166,6 @@ export const GoldMine: FC<{
   };
 
   const claimRewards = async () => {
-    console.log(stakedIds);
     const tx = await goldContract?.claimByTokenIds(
       stakedIds.map((id) => id.toHexString())
     );
@@ -231,9 +224,9 @@ export const GoldMine: FC<{
         }}
       >
         <Container rounded centered>
-          Welcome castle owner! If you are looking for treasure, you came to
-          just the right place. If you hand over the keys to your Castle, you
-          will earn GOLD, until you reclaim your fortress.
+          Welcome Ruler of the Realm! If you are looking for treasure, you came
+          to the right place. If you hand over the keys to your Castle, you will
+          earn GOLD, until you reclaim your fortress.
           <br />
           <br /> Only a fortune teller could tell, what you would do with all
           that GOLD...
@@ -272,8 +265,6 @@ export const GoldMine: FC<{
                           //  label={`x: ${fortress?.x} y: ${fortress?.y}`}
                           label={`name: ${id}`}
                           onSelect={async () => {
-                            const owner = await roeWrapperContract?.ownerOf(id);
-                            console.log("owner", owner);
                             setFortressIds({ ...fortressIds, [id]: !value });
                           }}
                         />
