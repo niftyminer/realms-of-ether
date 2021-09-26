@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/static/css/main.927f5425.chunk.css",
-    "main.js": "/static/js/main.3c7f6e5d.chunk.js",
-    "main.js.map": "/static/js/main.3c7f6e5d.chunk.js.map",
+    "main.js": "/static/js/main.c9af1816.chunk.js",
+    "main.js.map": "/static/js/main.c9af1816.chunk.js.map",
     "runtime-main.js": "/static/js/runtime-main.a0095a59.js",
     "runtime-main.js.map": "/static/js/runtime-main.a0095a59.js.map",
-    "static/js/2.1ac0e679.chunk.js": "/static/js/2.1ac0e679.chunk.js",
-    "static/js/2.1ac0e679.chunk.js.map": "/static/js/2.1ac0e679.chunk.js.map",
+    "static/js/2.4b2c2e7e.chunk.js": "/static/js/2.4b2c2e7e.chunk.js",
+    "static/js/2.4b2c2e7e.chunk.js.map": "/static/js/2.4b2c2e7e.chunk.js.map",
     "CNAME": "/CNAME",
     "index.html": "/index.html",
     "static/css/main.927f5425.chunk.css.map": "/static/css/main.927f5425.chunk.css.map",
-    "static/js/2.1ac0e679.chunk.js.LICENSE.txt": "/static/js/2.1ac0e679.chunk.js.LICENSE.txt",
+    "static/js/2.4b2c2e7e.chunk.js.LICENSE.txt": "/static/js/2.4b2c2e7e.chunk.js.LICENSE.txt",
     "static/media/castle.png": "/static/media/castle.3022023b.png",
     "static/media/dragon_cavern.png": "/static/media/dragon_cavern.b3c91a67.png",
     "static/media/gold_mine.png": "/static/media/gold_mine.95780023.png",
@@ -19,8 +19,8 @@
   },
   "entrypoints": [
     "static/js/runtime-main.a0095a59.js",
-    "static/js/2.1ac0e679.chunk.js",
+    "static/js/2.4b2c2e7e.chunk.js",
     "static/css/main.927f5425.chunk.css",
-    "static/js/main.3c7f6e5d.chunk.js"
+    "static/js/main.c9af1816.chunk.js"
   ]
 }
