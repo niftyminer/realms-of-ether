@@ -19,6 +19,7 @@ import {
   ROE_WRAPPER_CONTRACT_ADDRESS,
 } from "../addresses";
 import { seaCreaturesABI } from "../contracts/SeaCreatures";
+import { FAQ } from "../pages/FAQ";
 
 export const App: FC = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | undefined>();
@@ -150,6 +151,9 @@ export const App: FC = () => {
         <Switch>
           <Route path="/learn">
             <Learn />
+          </Route>
+          <Route path="/goldmine/faq">
+            <FAQ />
           </Route>
           <Route path="/goldmine">
             <GoldMine

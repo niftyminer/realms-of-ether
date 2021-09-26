@@ -18,6 +18,9 @@ export const GoldMine: FC<{
   const [rewards, setRewards] = useState("0");
   const [goldBalance, setGoldBalance] = useState("0");
   const [fortressIds, setFortressIds] = useState<Record<string, boolean>>({});
+  const [rewardByStakeIds, setRewardByStakeIds] = useState<
+    Record<string, BigNumber>
+  >({});
   const [stakedIds, setStakedIds] = useState<BigNumber[]>([]);
 
   console.log("fortress ids: ", fortressIds);
@@ -105,11 +108,15 @@ export const GoldMine: FC<{
     const func = async () => {
       if (goldContract != null) {
         let sum = constants.Zero;
+        const updatedRewardByStakeIds: Record<string, BigNumber> = {};
+
         for (const stakedId of stakedIds) {
           const reward = await goldContract.getRewardsByTokenId(stakedId);
+          updatedRewardByStakeIds[stakedId.toHexString()] = reward;
           sum = sum.add(reward);
         }
         setRewards(formatEther(sum));
+        setRewardByStakeIds(updatedRewardByStakeIds);
       }
     };
     func();
@@ -262,7 +269,7 @@ export const GoldMine: FC<{
               </Container>
             </div>
             <Container rounded title="Dashboard">
-              <div style={{ paddingBottom: 20 }}>
+              <div style={{ padding: 20 }}>
                 <Table bordered>
                   <tbody style={{ whiteSpace: "nowrap" }}>
                     <tr>
@@ -277,80 +284,96 @@ export const GoldMine: FC<{
                   </tbody>
                 </Table>
               </div>
-              <Table bordered>
-                <thead style={{ whiteSpace: "nowrap" }}>
-                  <tr>
-                    <th>Fortresses</th>
-                    <th>Rewards</th>
-                    <th>Claim All</th>
-                    <th>Unstake All</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{stakedIds.length}</td>
-                    <td>
-                      <div style={{ display: "flex", flexWrap: "nowrap" }}>
-                        {limitDecimals(rewards)}{" "}
-                        <img width={20} src={gold} alt="gold" />
-                      </div>
-                    </td>
-                    <td>
-                      <Button
-                        primary
-                        // @ts-ignore
-                        onClick={claimRewards}
-                      >
-                        Claim
-                      </Button>
-                    </td>
-                    <td>
-                      <Button
-                        error
-                        // @ts-ignore
-                        onClick={unstakeAll}
-                      >
-                        Unstake
-                      </Button>
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
-              {/* <Container rounded title="Details">
-                <Table bordered>
-                  <thead style={{ whiteSpace: "nowrap" }}>
-                    <tr>
-                      <th>Fortress ID</th>
-                      <th>Rewards</th>
-                      <th>Collect</th>
-                      <th>Unstake</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {stakedIds.map((id) => (
+              <div style={{ padding: 20, paddingTop: 10, paddingBottom: 10 }}>
+                <Container rounded title="Dashboard">
+                  <Table bordered>
+                    <thead style={{ whiteSpace: "nowrap" }}>
                       <tr>
-                        <td>{id.toHexString()}</td>
+                        <th>Fortresses</th>
+                        <th>Rewards</th>
+                        <th>Claim All</th>
+                        <th>Unstake All</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{stakedIds.length}</td>
                         <td>
-                          45 <img width={20} src={gold} alt="gold" />
+                          <div style={{ display: "flex", flexWrap: "nowrap" }}>
+                            {limitDecimals(rewards)}{" "}
+                            <img width={20} src={gold} alt="gold" />
+                          </div>
                         </td>
                         <td>
-                          <Button primary>Collect</Button>
+                          <Button
+                            primary
+                            // @ts-ignore
+                            onClick={claimRewards}
+                          >
+                            Claim
+                          </Button>
                         </td>
                         <td>
                           <Button
                             error
                             // @ts-ignore
-                            onClick={() => unstakeById(id)}
+                            onClick={unstakeAll}
                           >
                             Unstake
                           </Button>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </Container> */}
-              <div style={{ height: 20 }} />
+                    </tbody>
+                  </Table>
+                </Container>
+              </div>
+              <div style={{ padding: 20 }}>
+                <Container rounded title="Details">
+                  <Table bordered>
+                    <thead style={{ whiteSpace: "nowrap" }}>
+                      <tr>
+                        <th>Fortress ID</th>
+                        <th>Rewards</th>
+                        <th>Collect</th>
+                        <th>Unstake</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {stakedIds.map((id) => (
+                        <tr>
+                          <td>{id.toHexString()}</td>
+                          <td>
+                            <div
+                              style={{ display: "flex", flexWrap: "nowrap" }}
+                            >
+                              {rewardByStakeIds?.[id.toHexString()] != null
+                                ? limitDecimals(
+                                    formatEther(
+                                      rewardByStakeIds?.[id.toHexString()]
+                                    )
+                                  )
+                                : "0"}{" "}
+                              <img width={20} src={gold} alt="gold" />
+                            </div>
+                          </td>
+                          <td>
+                            <Button primary>Collect</Button>
+                          </td>
+                          <td>
+                            <Button
+                              error
+                              // @ts-ignore
+                              onClick={() => unstakeById(id)}
+                            >
+                              Unstake
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </Container>
+              </div>
             </Container>
           </>
         )}
