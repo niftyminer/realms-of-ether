@@ -20,6 +20,7 @@ export const GoldMine: FC<{
   const [fortressIds, setFortressIds] = useState<Record<string, boolean>>({});
   const [stakedIds, setStakedIds] = useState<BigNumber[]>([]);
 
+  console.log("fortress ids: ", fortressIds);
   // gold balance
   useEffect(() => {
     const func = async () => {
@@ -61,7 +62,13 @@ export const GoldMine: FC<{
           async (id: BigNumber) => {
             const staker = (await goldContract.getStaker(id)).toLowerCase();
             if (staker === selectedAddress) {
-              setStakedIds((currentValue) => [...currentValue, id]);
+              setStakedIds((currentValue) => {
+                const hexValues = [...currentValue, id].map((v) =>
+                  v.toHexString()
+                );
+                const uniqueHexValues = [...new Set([...hexValues])];
+                return uniqueHexValues.map((uhv) => BigNumber.from(uhv));
+              });
             }
           }
         );
@@ -72,13 +79,14 @@ export const GoldMine: FC<{
         const stakedForSelectedAddress: BigNumber[] = [];
         for (const id of allStakedIds) {
           const staker = (await goldContract.getStaker(id)).toLowerCase();
-          console.log("staker", staker);
-          console.log("selectedAddress", selectedAddress);
           if (staker === selectedAddress) {
             stakedForSelectedAddress.push(id);
           }
         }
-        setStakedIds(stakedForSelectedAddress);
+        const hexValues = stakedForSelectedAddress.map((v) => v.toHexString());
+        const uniqueHexValues = [...new Set([...hexValues])];
+
+        setStakedIds(uniqueHexValues.map((uhv) => BigNumber.from(uhv)));
       }
     };
     func();
@@ -156,9 +164,13 @@ export const GoldMine: FC<{
   };
 
   const unstakeAll = async () => {
-    await goldContract?.unstakeByIds(stakedIds);
+    await goldContract?.unstakeByIds(stakedIds.map((id) => id.toHexString()));
     setStakedIds([]);
   };
+
+  // const unstakeById = async (id: BigNumber) => {
+  //   await goldContract?.unstakeByIds([id.toHexString()]);
+  // };
 
   return (
     <>
@@ -305,43 +317,39 @@ export const GoldMine: FC<{
                 </tbody>
               </Table>
               {/* <Container rounded title="Details">
-            <Table bordered>
-              <thead style={{ whiteSpace: "nowrap" }}>
-                <tr>
-                  <th>Fortress ID</th>
-                  <th>Rewards</th>
-                  <th>Collect</th>
-                  <th>Unstake</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>141424234</td>
-                  <td>
-                    45 <img width={20} src={gold} alt="gold" />
-                  </td>
-                  <td>
-                    <Button primary>Collect</Button>
-                  </td>
-                  <td>
-                    <Button error>Unstake</Button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>141424234</td>
-                  <td>
-                    45 <img width={20} src={gold} alt="gold" />
-                  </td>
-                  <td>
-                    <Button primary>Collect</Button>
-                  </td>
-                  <td>
-                    <Button error>Unstake</Button>
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
-          </Container> */}
+                <Table bordered>
+                  <thead style={{ whiteSpace: "nowrap" }}>
+                    <tr>
+                      <th>Fortress ID</th>
+                      <th>Rewards</th>
+                      <th>Collect</th>
+                      <th>Unstake</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stakedIds.map((id) => (
+                      <tr>
+                        <td>{id.toHexString()}</td>
+                        <td>
+                          45 <img width={20} src={gold} alt="gold" />
+                        </td>
+                        <td>
+                          <Button primary>Collect</Button>
+                        </td>
+                        <td>
+                          <Button
+                            error
+                            // @ts-ignore
+                            onClick={() => unstakeById(id)}
+                          >
+                            Unstake
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </Container> */}
               <div style={{ height: 20 }} />
             </Container>
           </>
