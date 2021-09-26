@@ -15,15 +15,15 @@ export const GoldMine: FC<{
   roeWrapperContract: Contract | undefined;
 }> = ({ selectedAddress, goldContract, roeWrapperContract }) => {
   const [approved, setApproved] = useState(false);
-  const [rewards, setRewards] = useState("0");
+  const [rewards, setRewards] = useState(constants.Zero);
   const [goldBalance, setGoldBalance] = useState("0");
+  const [goldSupply, setGoldSupply] = useState("0");
   const [fortressIds, setFortressIds] = useState<Record<string, boolean>>({});
   const [rewardByStakeIds, setRewardByStakeIds] = useState<
     Record<string, BigNumber>
   >({});
   const [stakedIds, setStakedIds] = useState<BigNumber[]>([]);
 
-  console.log("fortress ids: ", fortressIds);
   // gold balance
   useEffect(() => {
     const func = async () => {
@@ -31,12 +31,11 @@ export const GoldMine: FC<{
         const balance: BigNumber = await goldContract.balanceOf(
           selectedAddress
         );
-        console.log("gold balance", balance);
         setGoldBalance(balance.toString());
       }
     };
     func();
-  }, [goldContract, selectedAddress, rewards]);
+  }, [goldContract, selectedAddress, rewards, rewardByStakeIds]);
 
   // setFortresses
   useEffect(() => {
@@ -103,6 +102,17 @@ export const GoldMine: FC<{
     console.log(stakedIds);
   }, [stakedIds]);
 
+  // gold supply
+  useEffect(() => {
+    const func = async () => {
+      if (goldContract != null) {
+        const supply: BigNumber = await goldContract.totalSupply();
+        setGoldSupply(supply.toString());
+      }
+    };
+    func();
+  }, [goldContract, selectedAddress, stakedIds, rewards, rewardByStakeIds]);
+
   // rewards
   useEffect(() => {
     const func = async () => {
@@ -115,7 +125,7 @@ export const GoldMine: FC<{
           updatedRewardByStakeIds[stakedId.toHexString()] = reward;
           sum = sum.add(reward);
         }
-        setRewards(formatEther(sum));
+        setRewards(sum);
         setRewardByStakeIds(updatedRewardByStakeIds);
       }
     };
@@ -167,7 +177,23 @@ export const GoldMine: FC<{
       stakedIds.map((id) => id.toHexString())
     );
     await tx.wait();
-    setRewards("0");
+    setRewards(constants.Zero);
+    setRewardByStakeIds((currentValue) => ({
+      ...Object.fromEntries(
+        Object.entries(currentValue).map(([k, _v]) => [k, constants.Zero])
+      ),
+    }));
+  };
+
+  const claimRewardsById = async (id: BigNumber) => {
+    const reward = rewardByStakeIds[id.toHexString()];
+    const tx = await goldContract?.claimByTokenId(id.toHexString());
+    await tx.wait();
+    setRewardByStakeIds((currentValue) => ({
+      ...currentValue,
+      [id.toHexString()]: constants.Zero,
+    }));
+    setRewards((currentValue) => currentValue.sub(reward));
   };
 
   const unstakeAll = async () => {
@@ -175,9 +201,9 @@ export const GoldMine: FC<{
     setStakedIds([]);
   };
 
-  // const unstakeById = async (id: BigNumber) => {
-  //   await goldContract?.unstakeByIds([id.toHexString()]);
-  // };
+  const unstakeById = async (id: BigNumber) => {
+    await goldContract?.unstakeByIds([id.toHexString()]);
+  };
 
   return (
     <>
@@ -273,7 +299,16 @@ export const GoldMine: FC<{
                 <Table bordered>
                   <tbody style={{ whiteSpace: "nowrap" }}>
                     <tr>
-                      <td>Gold balance</td>
+                      <td>Total GOLD supply</td>
+                      <td>
+                        <div style={{ display: "flex", flexWrap: "nowrap" }}>
+                          {limitDecimals(formatEther(goldSupply))}{" "}
+                          <img width={20} src={gold} alt="gold" />
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>My GOLD balance</td>
                       <td>
                         <div style={{ display: "flex", flexWrap: "nowrap" }}>
                           {limitDecimals(formatEther(goldBalance))}{" "}
@@ -300,7 +335,7 @@ export const GoldMine: FC<{
                         <td>{stakedIds.length}</td>
                         <td>
                           <div style={{ display: "flex", flexWrap: "nowrap" }}>
-                            {limitDecimals(rewards)}{" "}
+                            {limitDecimals(formatEther(rewards))}{" "}
                             <img width={20} src={gold} alt="gold" />
                           </div>
                         </td>
@@ -340,7 +375,7 @@ export const GoldMine: FC<{
                     </thead>
                     <tbody>
                       {stakedIds.map((id) => (
-                        <tr>
+                        <tr key={id.toString()}>
                           <td>{id.toHexString()}</td>
                           <td>
                             <div
@@ -357,7 +392,13 @@ export const GoldMine: FC<{
                             </div>
                           </td>
                           <td>
-                            <Button primary>Collect</Button>
+                            <Button
+                              primary
+                              // @ts-ignore
+                              onClick={() => claimRewardsById(id)}
+                            >
+                              Collect
+                            </Button>
                           </td>
                           <td>
                             <Button
