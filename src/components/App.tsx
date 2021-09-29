@@ -7,7 +7,7 @@ import { getEthereumClient } from "../utils/ethereum";
 import { roeABI } from "../contracts/RealmsOfEther";
 import { roeWrapperABI } from "../contracts/RealmsOfEtherWrapper";
 import { goldABI } from "../contracts/Gold";
-import { Button, Container, Icon } from "nes-react";
+import { Container, Icon } from "nes-react";
 import { Inspector } from "../pages/Inspector";
 import { Learn } from "../pages/Learn";
 import { GoldMine } from "../pages/GoldMine";
@@ -95,34 +95,55 @@ export const App: FC = () => {
           display: "flex",
           width: "100%",
           flexDirection: "row",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            width: 600,
+            flexDirection: "row",
+            justifyContent: "space-around",
+            alignItems: "center",
+          }}
+        >
+          <NavLink to="/" style={{ textDecoration: "none", color: "black" }}>
+            <h3>Inspector</h3>
+          </NavLink>
+          <NavLink
+            to="/goldmine"
+            style={{ textDecoration: "none", color: "black" }}
+          >
+            <h3>Gold Mine</h3>
+          </NavLink>
+          <NavLink
+            to="/learn"
+            style={{ textDecoration: "none", color: "black" }}
+          >
+            <h3> Learn</h3>
+          </NavLink>
+        </div>
+        <Wallet
+          address={selectedAddress}
+          connectWallet={() => connectWallet()}
+          networkError={networkError}
+          dismiss={() => setNetworkError(undefined)}
+        />
+      </div>
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          flexDirection: "row",
+          justifyContent: "center",
           alignItems: "center",
           paddingBottom: 15,
         }}
       >
         <NavLink to="/" style={{ textDecoration: "none", color: "black" }}>
-          <h1>Realms Of Ether Inspector</h1>
+          <h1>Realms Of Ether Revive</h1>
         </NavLink>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <NavLink
-            to="/learn"
-            style={{ textDecoration: "none", color: "black" }}
-          >
-            <Button>Learn</Button>
-          </NavLink>
-          <Wallet
-            address={selectedAddress}
-            connectWallet={() => connectWallet()}
-            networkError={networkError}
-            dismiss={() => setNetworkError(undefined)}
-          />
-        </div>
       </div>
       <div
         style={{

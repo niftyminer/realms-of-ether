@@ -5,6 +5,7 @@ import { Row } from "../components/Row";
 import { metadata } from "../metadata";
 import { GOLD_CONTRACT_ADDRESS } from "../addresses";
 import { formatEther } from "@ethersproject/units";
+import { NavLink } from "react-router-dom";
 
 const gold = require("../assets/gold.png").default;
 const castle = require("../assets/castle.png").default;
@@ -210,8 +211,25 @@ export const GoldMine: FC<{
         <div style={{ paddingRight: 20 }}>
           <img width={30} height={38} src={gold} alt="gold" />
         </div>
-        <h3>Gold Mine</h3>
-        <div style={{ paddingLeft: 20 }}>
+        <div style={{ paddingRight: 20 }}>
+          <img width={30} height={38} src={gold} alt="gold" />
+        </div>
+        <div style={{ paddingRight: 20 }}>
+          <img width={30} height={38} src={gold} alt="gold" />
+        </div>
+        <div style={{ paddingRight: 20 }}>
+          <img width={30} height={38} src={gold} alt="gold" />
+        </div>
+        <div style={{ paddingRight: 20 }}>
+          <img width={30} height={38} src={gold} alt="gold" />
+        </div>
+        <div style={{ paddingRight: 20 }}>
+          <img width={30} height={38} src={gold} alt="gold" />
+        </div>
+        <div style={{ paddingRight: 20 }}>
+          <img width={30} height={38} src={gold} alt="gold" />
+        </div>
+        <div style={{ paddingRight: 20 }}>
           <img width={30} height={38} src={gold} alt="gold" />
         </div>
       </div>
@@ -228,8 +246,10 @@ export const GoldMine: FC<{
           to the right place. If you hand over the keys to your Castle, you will
           earn GOLD, until you reclaim your fortress.
           <br />
-          <br /> Only a fortune teller could tell, what you would do with all
-          that GOLD...
+          <br /> Only a <NavLink to="/goldmine/faq">
+            fortune teller
+          </NavLink>{" "}
+          could tell, what all this means...
         </Container>
         <div style={{ padding: 30 }}>
           {!approved && (

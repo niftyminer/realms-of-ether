@@ -58,7 +58,7 @@ export const Inspector: FC<{
 
   return (
     <>
-      <h4>Explore the traits of your fortress</h4>
+      <h3>Explore the traits of your fortress</h3>
       <Search
         xInput={xInput}
         yInput={yInput}
@@ -69,7 +69,7 @@ export const Inspector: FC<{
       />
       <div style={{ padding: 10 }}>
         {numberOfWrapped != null && (
-          <h3>{`Fortresses wrapped: ${numberOfWrapped}/500`}</h3>
+          <h4>{`Fortresses wrapped: ${numberOfWrapped}/500`}</h4>
         )}
       </div>
       <FoundMessage fortressData={searchResult} />

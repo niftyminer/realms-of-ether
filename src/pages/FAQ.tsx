@@ -1,5 +1,6 @@
 import { Balloon } from "nes-react";
 import { FC } from "react";
+import { AddToken } from "../components/AddToken";
 
 const dragonOfWisdom = require("../assets/dragon_of_wisdom.png").default;
 const dragonOfPower = require("../assets/dragon_of_power.png").default;
@@ -29,6 +30,37 @@ export const FAQ: FC = () => {
           fromRight
         >
           {`The Gold Mine is a smart contract where you can stake your RoE fortress to earn GOLD, an ERC20 token.`}
+        </Balloon>
+        <img
+          width={150}
+          height={150}
+          src={dragonOfWisdom}
+          alt={"dragon-of-wisdom"}
+        />
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-end" }}>
+        <img
+          width={150}
+          height={150}
+          src={dragonOfPower}
+          alt={"dragon-of-power"}
+        />
+        <Balloon
+          // @ts-ignore
+          style={{ margin: "2rem", marginBottom: "5rem", maxWidth: "500px" }}
+          fromLeft
+        >
+          {`Can I see the GOLD in MetaMask?`}
+        </Balloon>
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-end" }}>
+        <Balloon
+          // @ts-ignore
+          style={{ margin: "2rem", marginBottom: "5rem", maxWidth: "400px" }}
+          fromRight
+        >
+          {`Yes, just press this button: `}
+          <AddToken>Add GOLD to MetaMask</AddToken>
         </Balloon>
         <img
           width={150}
