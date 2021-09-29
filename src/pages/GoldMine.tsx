@@ -18,6 +18,7 @@ export const GoldMine: FC<{
   const [approved, setApproved] = useState(false);
   const [rewards, setRewards] = useState(constants.Zero);
   const [goldBalance, setGoldBalance] = useState("0");
+  const [tfl, setTfl] = useState("0");
   const [goldSupply, setGoldSupply] = useState("0");
   const [fortressIds, setFortressIds] = useState<Record<string, boolean>>({});
   const [rewardByStakeIds, setRewardByStakeIds] = useState<
@@ -37,6 +38,19 @@ export const GoldMine: FC<{
     };
     func();
   }, [goldContract, selectedAddress, rewards, rewardByStakeIds]);
+
+  // total fortresses locked
+  useEffect(() => {
+    const func = async () => {
+      if (roeWrapperContract != null) {
+        const balance: BigNumber = await roeWrapperContract.balanceOf(
+          GOLD_CONTRACT_ADDRESS
+        );
+        setTfl(balance.toString());
+      }
+    };
+    func();
+  }, [roeWrapperContract, selectedAddress, stakedIds]);
 
   // setFortresses
   useEffect(() => {
@@ -316,6 +330,15 @@ export const GoldMine: FC<{
                         <div style={{ display: "flex", flexWrap: "nowrap" }}>
                           {limitDecimals(formatEther(goldSupply))}{" "}
                           <img width={20} src={gold} alt="gold" />
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Total Fortresses Locked</td>
+                      <td>
+                        <div style={{ display: "flex", flexWrap: "nowrap" }}>
+                          {tfl}
+                          <img height={20} src={castle} alt="gold" />
                         </div>
                       </td>
                     </tr>
