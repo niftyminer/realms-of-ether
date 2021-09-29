@@ -66,7 +66,7 @@ export const GoldMine: FC<{
             if (staker === selectedAddress) {
               setStakedIds((currentValue) => {
                 const hexValues = [...currentValue, id].map((v) =>
-                  v.toHexString()
+                  v.toString()
                 );
                 const uniqueHexValues = [...new Set([...hexValues])];
                 return uniqueHexValues.map((uhv) => BigNumber.from(uhv));
@@ -84,7 +84,7 @@ export const GoldMine: FC<{
             stakedForSelectedAddress.push(id);
           }
         }
-        const hexValues = stakedForSelectedAddress.map((v) => v.toHexString());
+        const hexValues = stakedForSelectedAddress.map((v) => v.toString());
         const uniqueHexValues = [...new Set([...hexValues])];
 
         setStakedIds(uniqueHexValues.map((uhv) => BigNumber.from(uhv)));
@@ -117,7 +117,7 @@ export const GoldMine: FC<{
 
         for (const stakedId of stakedIds) {
           const reward = await goldContract.getRewardsByTokenId(stakedId);
-          updatedRewardByStakeIds[stakedId.toHexString()] = reward;
+          updatedRewardByStakeIds[stakedId.toString()] = reward;
           sum = sum.add(reward);
         }
         setRewards(sum);
@@ -167,7 +167,7 @@ export const GoldMine: FC<{
 
   const claimRewards = async () => {
     const tx = await goldContract?.claimByTokenIds(
-      stakedIds.map((id) => id.toHexString())
+      stakedIds.map((id) => id.toString())
     );
     await tx.wait();
     setRewards(constants.Zero);
@@ -179,23 +179,23 @@ export const GoldMine: FC<{
   };
 
   const claimRewardsById = async (id: BigNumber) => {
-    const reward = rewardByStakeIds[id.toHexString()];
-    const tx = await goldContract?.claimByTokenId(id.toHexString());
+    const reward = rewardByStakeIds[id.toString()];
+    const tx = await goldContract?.claimByTokenId(id.toString());
     await tx.wait();
     setRewardByStakeIds((currentValue) => ({
       ...currentValue,
-      [id.toHexString()]: constants.Zero,
+      [id.toString()]: constants.Zero,
     }));
     setRewards((currentValue) => currentValue.sub(reward));
   };
 
   const unstakeAll = async () => {
-    await goldContract?.unstakeByIds(stakedIds.map((id) => id.toHexString()));
+    await goldContract?.unstakeByIds(stakedIds.map((id) => id.toString()));
     setStakedIds([]);
   };
 
   const unstakeById = async (id: BigNumber) => {
-    await goldContract?.unstakeByIds([id.toHexString()]);
+    await goldContract?.unstakeByIds([id.toString()]);
   };
 
   return (
@@ -257,13 +257,14 @@ export const GoldMine: FC<{
                     }}
                   >
                     {Object.entries(fortressIds).map(([id, value]) => {
-                      // const fortress = metadata.find((data) => data.hash === id);
+                      const fortress = metadata.find(
+                        (data) => data.hash === id
+                      );
                       return (
                         <Checkbox
                           key={id}
                           checked={value}
-                          //  label={`x: ${fortress?.x} y: ${fortress?.y}`}
-                          label={`name: ${id}`}
+                          label={`x: ${fortress?.x} y: ${fortress?.y}`}
                           onSelect={async () => {
                             setFortressIds({ ...fortressIds, [id]: !value });
                           }}
@@ -358,50 +359,55 @@ export const GoldMine: FC<{
                   <Table bordered>
                     <thead style={{ whiteSpace: "nowrap" }}>
                       <tr>
-                        <th>Fortress ID</th>
+                        <th>Fortress</th>
                         <th>Rewards</th>
                         <th>Collect</th>
                         <th>Unstake</th>
                       </tr>
                     </thead>
-                    <tbody>
-                      {stakedIds.map((id) => (
-                        <tr key={id.toString()}>
-                          <td>{id.toHexString()}</td>
-                          <td>
-                            <div
-                              style={{ display: "flex", flexWrap: "nowrap" }}
-                            >
-                              {rewardByStakeIds?.[id.toHexString()] != null
-                                ? limitDecimals(
-                                    formatEther(
-                                      rewardByStakeIds?.[id.toHexString()]
+                    <tbody style={{ whiteSpace: "nowrap" }}>
+                      {stakedIds.map((id) => {
+                        const fortress = metadata.find(
+                          (data) => data.hash === id.toHexString()
+                        );
+                        return (
+                          <tr key={id.toString()}>
+                            <td>{`x: ${fortress?.x} y: ${fortress?.y}`}</td>
+                            <td>
+                              <div
+                                style={{ display: "flex", flexWrap: "nowrap" }}
+                              >
+                                {rewardByStakeIds?.[id.toString()] != null
+                                  ? limitDecimals(
+                                      formatEther(
+                                        rewardByStakeIds?.[id.toString()]
+                                      )
                                     )
-                                  )
-                                : "0"}{" "}
-                              <img width={20} src={gold} alt="gold" />
-                            </div>
-                          </td>
-                          <td>
-                            <Button
-                              primary
-                              // @ts-ignore
-                              onClick={() => claimRewardsById(id)}
-                            >
-                              Collect
-                            </Button>
-                          </td>
-                          <td>
-                            <Button
-                              error
-                              // @ts-ignore
-                              onClick={() => unstakeById(id)}
-                            >
-                              Unstake
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
+                                  : "0"}{" "}
+                                <img width={20} src={gold} alt="gold" />
+                              </div>
+                            </td>
+                            <td>
+                              <Button
+                                primary
+                                // @ts-ignore
+                                onClick={() => claimRewardsById(id)}
+                              >
+                                Collect
+                              </Button>
+                            </td>
+                            <td>
+                              <Button
+                                error
+                                // @ts-ignore
+                                onClick={() => unstakeById(id)}
+                              >
+                                Unstake
+                              </Button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </Table>
                 </Container>

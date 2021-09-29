@@ -1,4 +1,4 @@
-import { Sprite, Balloon } from "nes-react";
+import { Balloon } from "nes-react";
 import { FC } from "react";
 
 const dragonOfWisdom = require("../assets/dragon_of_wisdom.png").default;

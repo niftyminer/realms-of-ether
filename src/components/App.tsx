@@ -14,11 +14,9 @@ import { GoldMine } from "../pages/GoldMine";
 import { Donation } from "./Donation";
 import {
   GOLD_CONTRACT_ADDRESS,
-  OPENSEA_RINKEBY_CREATURES,
   ROE_CONTRACT_ADDRESS,
   ROE_WRAPPER_CONTRACT_ADDRESS,
 } from "../addresses";
-import { seaCreaturesABI } from "../contracts/SeaCreatures";
 import { FAQ } from "../pages/FAQ";
 
 export const App: FC = () => {
@@ -26,9 +24,6 @@ export const App: FC = () => {
   const [networkError, setNetworkError] = useState<string | undefined>();
   const [roeContract, setRoeContract] = useState<undefined | ethers.Contract>();
   const [roeWrapperContract, setRoeWrapperContract] = useState<
-    undefined | ethers.Contract
-  >();
-  const [creaturesRinkebyContract, setCreaturesRinkebyContract] = useState<
     undefined | ethers.Contract
   >();
   const [goldContract, setGoldContract] = useState<
@@ -57,13 +52,6 @@ export const App: FC = () => {
     );
     setGoldContract(
       new ethers.Contract(GOLD_CONTRACT_ADDRESS, goldABI, provider.getSigner(0))
-    );
-    setCreaturesRinkebyContract(
-      new ethers.Contract(
-        OPENSEA_RINKEBY_CREATURES,
-        seaCreaturesABI,
-        provider.getSigner(0)
-      )
     );
   }, []);
 
@@ -159,7 +147,7 @@ export const App: FC = () => {
             <GoldMine
               selectedAddress={selectedAddress}
               goldContract={goldContract}
-              roeWrapperContract={creaturesRinkebyContract}
+              roeWrapperContract={roeWrapperContract}
             />
           </Route>
           <Route path="/">
