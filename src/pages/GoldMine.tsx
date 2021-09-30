@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { BigNumber, constants, Contract, Event } from "ethers";
-import { Button, Checkbox, Container, Table } from "nes-react";
+import { Button, Checkbox, Container, Icon, Table } from "nes-react";
 import { Row } from "../components/Row";
 import { metadata } from "../metadata";
 import { GOLD_CONTRACT_ADDRESS } from "../addresses";
@@ -24,7 +24,8 @@ export const GoldMine: FC<{
   const [rewardByStakeIds, setRewardByStakeIds] = useState<
     Record<string, BigNumber>
   >({});
-  const [stakedIds, setStakedIds] = useState<BigNumber[]>([]);
+  const [stakedIds, setStakedIds] = useState<BigNumber[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // gold balance
   useEffect(() => {
@@ -80,7 +81,7 @@ export const GoldMine: FC<{
             const staker = (await goldContract.getStaker(id)).toLowerCase();
             if (staker === selectedAddress) {
               setStakedIds((currentValue) => {
-                const hexValues = [...currentValue, id].map((v) =>
+                const hexValues = [...(currentValue ?? []), id].map((v) =>
                   v.toString()
                 );
                 const uniqueHexValues = [...new Set([...hexValues])];
@@ -126,7 +127,7 @@ export const GoldMine: FC<{
   // rewards
   useEffect(() => {
     const func = async () => {
-      if (goldContract != null) {
+      if (goldContract != null && stakedIds != null) {
         let sum = constants.Zero;
         const updatedRewardByStakeIds: Record<string, BigNumber> = {};
 
@@ -137,6 +138,7 @@ export const GoldMine: FC<{
         }
         setRewards(sum);
         setRewardByStakeIds(updatedRewardByStakeIds);
+        setIsLoading(false);
       }
     };
     func();
@@ -182,7 +184,7 @@ export const GoldMine: FC<{
 
   const claimRewards = async () => {
     const tx = await goldContract?.claimByTokenIds(
-      stakedIds.map((id) => id.toString())
+      stakedIds?.map((id) => id.toString())
     );
     await tx.wait();
     setRewards(constants.Zero);
@@ -205,7 +207,7 @@ export const GoldMine: FC<{
   };
 
   const unstakeAll = async () => {
-    await goldContract?.unstakeByIds(stakedIds.map((id) => id.toString()));
+    await goldContract?.unstakeByIds(stakedIds?.map((id) => id.toString()));
     setStakedIds([]);
   };
 
@@ -354,79 +356,33 @@ export const GoldMine: FC<{
                   </tbody>
                 </Table>
               </div>
-              <div style={{ padding: 20, paddingTop: 10, paddingBottom: 10 }}>
-                <Container rounded title="Dashboard">
-                  <Table bordered>
-                    <thead style={{ whiteSpace: "nowrap" }}>
-                      <tr>
-                        <th>Fortresses</th>
-                        <th>Rewards</th>
-                        <th>Claim All</th>
-                        <th>Unstake All</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>{stakedIds.length}</td>
-                        <td>
-                          <div style={{ display: "flex", flexWrap: "nowrap" }}>
-                            {limitDecimals(formatEther(rewards))}{" "}
-                            <img width={20} src={gold} alt="gold" />
-                          </div>
-                        </td>
-                        <td>
-                          <Button
-                            primary
-                            // @ts-ignore
-                            onClick={claimRewards}
-                          >
-                            Claim
-                          </Button>
-                        </td>
-                        <td>
-                          <Button
-                            error
-                            // @ts-ignore
-                            onClick={unstakeAll}
-                          >
-                            Unstake
-                          </Button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </Table>
-                </Container>
-              </div>
-              <div style={{ padding: 20 }}>
-                <Container rounded title="Details">
-                  <Table bordered>
-                    <thead style={{ whiteSpace: "nowrap" }}>
-                      <tr>
-                        <th>Fortress</th>
-                        <th>Rewards</th>
-                        <th>Collect</th>
-                        <th>Unstake</th>
-                      </tr>
-                    </thead>
-                    <tbody style={{ whiteSpace: "nowrap" }}>
-                      {stakedIds.map((id) => {
-                        const fortress = metadata.find(
-                          (data) => data.hash === id.toHexString()
-                        );
-                        return (
-                          <tr key={id.toString()}>
-                            <td>{`x: ${fortress?.x} y: ${fortress?.y}`}</td>
+              {isLoading ? (
+                <div style={{ paddingLeft: "45%" }}>
+                  <Icon className="spinner" icon="star" medium />
+                </div>
+              ) : (
+                <>
+                  <div
+                    style={{ padding: 20, paddingTop: 10, paddingBottom: 10 }}
+                  >
+                    <Container rounded title="Overview">
+                      <Table bordered>
+                        <thead style={{ whiteSpace: "nowrap" }}>
+                          <tr>
+                            <th>Fortresses</th>
+                            <th>Rewards</th>
+                            <th>Claim All</th>
+                            <th>Unstake All</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>{stakedIds?.length}</td>
                             <td>
                               <div
                                 style={{ display: "flex", flexWrap: "nowrap" }}
                               >
-                                {rewardByStakeIds?.[id.toString()] != null
-                                  ? limitDecimals(
-                                      formatEther(
-                                        rewardByStakeIds?.[id.toString()]
-                                      )
-                                    )
-                                  : "0"}{" "}
+                                {limitDecimals(formatEther(rewards))}{" "}
                                 <img width={20} src={gold} alt="gold" />
                               </div>
                             </td>
@@ -434,27 +390,88 @@ export const GoldMine: FC<{
                               <Button
                                 primary
                                 // @ts-ignore
-                                onClick={() => claimRewardsById(id)}
+                                onClick={claimRewards}
                               >
-                                Collect
+                                Claim
                               </Button>
                             </td>
                             <td>
                               <Button
                                 error
                                 // @ts-ignore
-                                onClick={() => unstakeById(id)}
+                                onClick={unstakeAll}
                               >
                                 Unstake
                               </Button>
                             </td>
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </Table>
-                </Container>
-              </div>
+                        </tbody>
+                      </Table>
+                    </Container>
+                  </div>
+                  <div style={{ padding: 20 }}>
+                    <Container rounded title="Details">
+                      <Table bordered>
+                        <thead style={{ whiteSpace: "nowrap" }}>
+                          <tr>
+                            <th>Fortress</th>
+                            <th>Rewards</th>
+                            <th>Collect</th>
+                            <th>Unstake</th>
+                          </tr>
+                        </thead>
+                        <tbody style={{ whiteSpace: "nowrap" }}>
+                          {stakedIds?.map((id) => {
+                            const fortress = metadata.find(
+                              (data) => data.hash === id.toHexString()
+                            );
+                            return (
+                              <tr key={id.toString()}>
+                                <td>{`x: ${fortress?.x} y: ${fortress?.y}`}</td>
+                                <td>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      flexWrap: "nowrap",
+                                    }}
+                                  >
+                                    {rewardByStakeIds?.[id.toString()] != null
+                                      ? limitDecimals(
+                                          formatEther(
+                                            rewardByStakeIds?.[id.toString()]
+                                          )
+                                        )
+                                      : "0"}{" "}
+                                    <img width={20} src={gold} alt="gold" />
+                                  </div>
+                                </td>
+                                <td>
+                                  <Button
+                                    primary
+                                    // @ts-ignore
+                                    onClick={() => claimRewardsById(id)}
+                                  >
+                                    Collect
+                                  </Button>
+                                </td>
+                                <td>
+                                  <Button
+                                    error
+                                    // @ts-ignore
+                                    onClick={() => unstakeById(id)}
+                                  >
+                                    Unstake
+                                  </Button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </Table>
+                    </Container>
+                  </div>
+                </>
+              )}
             </Container>
           </>
         )}
