@@ -1,5 +1,5 @@
 import { FC, useState, useEffect, useCallback } from "react";
-import { BigNumber, Contract } from "ethers";
+import { BigNumber, Contract, Event } from "ethers";
 import { findFortress, FortressData } from "../metadata";
 import { useQueryString } from "../utils/queryState";
 import { Resources } from "../components/Resources";
@@ -14,7 +14,8 @@ export const Inspector: FC<{
   selectedAddress: string | undefined;
   roeContract: Contract | undefined;
   roeWrapperContract: Contract | undefined;
-}> = ({ selectedAddress, roeContract, roeWrapperContract }) => {
+  goldContract: Contract | undefined;
+}> = ({ selectedAddress, roeContract, roeWrapperContract, goldContract }) => {
   const [xInput, setXInput] = useQueryString("x", "");
   const [yInput, setYInput] = useQueryString("y", "");
   const [searchResult, setSearchResult] = useState<
@@ -22,6 +23,10 @@ export const Inspector: FC<{
   >(null);
   const [ownerFortressHashes, setOwnerFortressHashes] = useState<string[]>([]);
   const [numberOfWrapped, setNumberOfWrapped] = useState<null | number>(null);
+  const [wrappedFortressHashes, setWrappedFortressHashes] = useState<string[]>(
+    []
+  );
+  const [stakedFortressHashes, setStakedIds] = useState<string[]>([]);
 
   const displaySearchResult = useCallback(() => {
     const f = findFortress(xInput as string, yInput as string);
@@ -33,6 +38,29 @@ export const Inspector: FC<{
       displaySearchResult();
     }
   }, [displaySearchResult, xInput, yInput]);
+
+  useEffect(() => {
+    const func = async () => {
+      console.log("stuff", goldContract);
+      if (goldContract != null) {
+        const eventFilter = goldContract.filters.FortressStaked();
+        const events = await goldContract.queryFilter(eventFilter);
+        const allStakedIds = events.map((e: Event) => e?.args?.[0]);
+        const allStaked: BigNumber[] = [];
+        for (const id of allStakedIds) {
+          const staker = (await goldContract.getStaker(id)).toLowerCase();
+          if (staker !== "0x0000000000000000000000000000000000000000") {
+            allStaked.push(id);
+          }
+        }
+        const hexValues = allStaked.map((v) => v.toHexString());
+        const uniqueHexValues = [...new Set([...hexValues])];
+        console.log("unique hex values", uniqueHexValues);
+        setStakedIds(uniqueHexValues);
+      }
+    };
+    func();
+  }, [goldContract, selectedAddress]);
 
   useEffect(() => {
     const func = async () => {
@@ -51,11 +79,22 @@ export const Inspector: FC<{
         const ts = await roeWrapperContract.totalSupply();
         const totalSupply = ts.toNumber();
         setNumberOfWrapped(totalSupply);
+        const fortressHashes: string[] = [];
+
+        for (let ind = 0; ind < totalSupply; ind++) {
+          const result: BigNumber = await roeWrapperContract.tokenByIndex(ind);
+          fortressHashes.push(result.toHexString());
+          setWrappedFortressHashes((current) => [
+            ...current,
+            result.toHexString(),
+          ]);
+        }
       }
     };
     func();
   }, [roeWrapperContract, selectedAddress]);
 
+  if (stakedFortressHashes.length === 0) return null;
   return (
     <>
       <h3>Explore the traits of your fortress</h3>
@@ -98,6 +137,8 @@ export const Inspector: FC<{
       <Realms
         fortressData={searchResult}
         ownerHashes={ownerFortressHashes}
+        stakedFortressHashes={stakedFortressHashes}
+        wrappedFortressHashes={wrappedFortressHashes}
         handleSelectTile={(x, y) => {
           window.history.pushState(
             "",

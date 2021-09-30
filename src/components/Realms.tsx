@@ -10,8 +10,16 @@ import {
 export const Realms: FC<{
   ownerHashes: string[];
   fortressData: FortressData | null | undefined;
+  wrappedFortressHashes: string[];
+  stakedFortressHashes: string[];
   handleSelectTile: (x: string, y: string) => void;
-}> = ({ ownerHashes, fortressData, handleSelectTile }) => {
+}> = ({
+  ownerHashes,
+  fortressData,
+  handleSelectTile,
+  wrappedFortressHashes,
+  stakedFortressHashes,
+}) => {
   const [showOwned, setShowOwned] = useState(true);
   const [show2017, setShow2017] = useState(true);
   const [show2018, setShow2018] = useState(false);
@@ -74,7 +82,9 @@ position: x: ${fortress.x} y: ${fortress.y}
                       }
                       style={{
                         backgroundColor: getColor(
-                          fortressData,
+                          fortress,
+                          wrappedFortressHashes,
+                          stakedFortressHashes,
                           ownerHashes,
                           fortress,
                           showOwned,
@@ -118,6 +128,8 @@ position: x: ${fortress.x} y: ${fortress.y}
 
 const getColor = (
   searchResult: FortressData | undefined | null,
+  wrappedFortressHashes: string[],
+  stakedFortressHashes: string[],
   ownerFortressHashes: string[],
   fortress: FortressData | undefined,
   showOwned: boolean,
@@ -131,18 +143,36 @@ const getColor = (
       searchResult.x === fortress.x &&
       searchResult.y === fortress.y
     ) {
-      return "#FEADCC";
-    } else if (showOwned && ownerFortressHashes.includes(fortress.hash)) {
-      return "#2B9EEB";
-    } else if (show2017 && calculateYear(fortress.blockNumber) === 2017) {
-      return "#94CB4B";
-    } else if (show2018 && calculateYear(fortress.blockNumber) === 2018) {
-      return "#F6D439";
-    } else if (show2019 && calculateYear(fortress.blockNumber) === 2019) {
-      return "#E56F5A";
-    } else {
-      return undefined;
+      // console.log(fortress);
+      // console.log(
+      //   "lol",
+      //   ownerFortressHashes.includes(fortress.hash)
+      //     ? "violet"
+      //     : fortress != null && wrappedFortressHashes.includes(fortress.hash)
+      //     ? stakedFortressHashes.includes(fortress.hash)
+      //       ? "red"
+      //       : "blue"
+      //     : undefined
+      // );
+      return fortress != null && wrappedFortressHashes.includes(fortress.hash)
+        ? stakedFortressHashes.includes(fortress.hash)
+          ? "red"
+          : "blue"
+        : undefined;
     }
+    // {
+    //   return "#FEADCC";
+    // } else if (showOwned && ownerFortressHashes.includes(fortress.hash)) {
+    //   return "#2B9EEB";
+    // } else if (show2017 && calculateYear(fortress.blockNumber) === 2017) {
+    //   return "#94CB4B";
+    // } else if (show2018 && calculateYear(fortress.blockNumber) === 2018) {
+    //   return "#F6D439";
+    // } else if (show2019 && calculateYear(fortress.blockNumber) === 2019) {
+    //   return "#E56F5A";
+    // } else {
+    //   return undefined;
+    // }
   } else {
     return undefined;
   }

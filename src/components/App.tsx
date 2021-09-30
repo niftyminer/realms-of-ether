@@ -176,6 +176,7 @@ export const App: FC = () => {
               selectedAddress={selectedAddress}
               roeContract={roeContract}
               roeWrapperContract={roeWrapperContract}
+              goldContract={goldContract}
             />
           </Route>
         </Switch>
