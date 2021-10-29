@@ -1,0 +1,94 @@
+<html>
+  <head>
+    <meta charset="utf8" />
+    <meta name="viewport" content="width=device-width" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Press+Start+2P"
+      rel="stylesheet"
+    />
+    <title>Dynamic Template</title>
+    <style>
+      html,
+      body,
+      pre,
+      code,
+      kbd,
+      samp,
+      button {
+        font-family: "Press Start 2P";
+        font-size: 12px;
+      }
+      body {
+        background-color: #fff;
+      }
+      #c {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-content: center;
+        align-items: center;
+        min-height: 95vh;
+      }
+      .i {
+        flex: 0 1 auto;
+        align-self: auto;
+        text-align: center;
+      }
+      img {
+        max-width: 100%;
+      }
+      button {
+        border: none;
+        background-color: #fff;
+        padding: 2px;
+        color: #111;
+        border-radius: 4px;
+        box-shadow: 0 -4px #fff, 0 -8px, 4px 0 #fff, 4px -4px, 8px 0, 0 4px #fff,
+          0 8px, -4px 0 #fff, -4px 4px, -8px 0, -4px -4px, 4px 4px;
+        border-radius: 0;
+        cursor: pointer;
+      }
+      #t {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        max-width: 85%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="c">
+      <div class="i">
+        <img id="p" src="/assets/kwith.png" />
+      </div>
+      <div class="i">
+        <img id="s" style="display: none" src="/assets/k.png" />
+      </div>
+      <button id="t">Hide Accessories</button>
+      <script>
+        (function () {
+          var $t = document.getElementById("t"),
+            $p = document.getElementById("p"),
+            $s = document.getElementById("s"),
+            x = true,
+            y = false,
+            w = 100;
+          $t.addEventListener("click", function () {
+            if (x) {
+              $s.style = "";
+              $p.style = "display:none";
+              $t.innerText = "Show Accessories";
+              x = false;
+            } else {
+              $p.style = "";
+              $s.style = "display:none";
+              $t.innerText = "Hide Accessories";
+              x = true;
+            }
+          });
+        })();
+      </script>
+    </div>
+  </body>
+</html>
