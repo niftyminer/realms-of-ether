@@ -34,9 +34,17 @@
         flex: 0 1 auto;
         align-self: auto;
         text-align: center;
-      }
-      img {
+        position: relative;
+        width: 400px;
+        height: 400px;
         max-width: 100%;
+      }
+      .i img {
+        max-width: 100%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
       }
       button {
         border: none;
@@ -60,29 +68,24 @@
   <body>
     <div id="c">
       <div class="i">
+        <img id="s" src="/assets/k.png" />
         <img id="p" src="/assets/kwith.png" />
-      </div>
-      <div class="i">
-        <img id="s" style="display: none" src="/assets/k.png" />
       </div>
       <button id="t">Hide Accessories</button>
       <script>
         (function () {
           var $t = document.getElementById("t"),
             $p = document.getElementById("p"),
-            $s = document.getElementById("s"),
             x = true,
             y = false,
             w = 100;
           $t.addEventListener("click", function () {
             if (x) {
-              $s.style = "";
               $p.style = "display:none";
               $t.innerText = "Show Accessories";
               x = false;
             } else {
               $p.style = "";
-              $s.style = "display:none";
               $t.innerText = "Hide Accessories";
               x = true;
             }
