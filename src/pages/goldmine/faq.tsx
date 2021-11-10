@@ -1,9 +1,9 @@
 import { Balloon } from "nes-react";
 import { FC } from "react";
-import { AddToken } from "../components/AddToken";
+import { AddToken } from "../../components/AddToken";
 
-const dragonOfWisdom = require("../assets/dragon_of_wisdom.png").default;
-const dragonOfPower = require("../assets/dragon_of_power.png").default;
+const dragonOfWisdom = "/assets/dragon_of_wisdom.png";
+const dragonOfPower = "/assets/dragon_of_power.png";
 
 export const FAQ: FC = () => {
   return (
@@ -192,3 +192,5 @@ export const FAQ: FC = () => {
     </div>
   );
 };
+
+export default FAQ;

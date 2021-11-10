@@ -87,8 +87,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "test": "node scripts/test.js"
+    "start": "next start"
   },
   "eslintConfig": {
     "extends": [

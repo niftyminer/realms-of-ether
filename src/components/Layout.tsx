@@ -8,7 +8,7 @@ import { roeWrapperABI } from "../contracts/RealmsOfEtherWrapper";
 import { goldABI } from "../contracts/Gold";
 import { Container, Icon } from "nes-react";
 import { Inspector } from "../pages/Inspector";
-import { Learn } from "../pages/Learn";
+import { Learn } from "../pages/learn";
 import { GoldMine } from "../pages/goldmine";
 import { Donation } from "./Donation";
 import {
@@ -16,7 +16,7 @@ import {
   ROE_CONTRACT_ADDRESS,
   ROE_WRAPPER_CONTRACT_ADDRESS,
 } from "../addresses";
-import { FAQ } from "../pages/FAQ";
+import { FAQ } from "../pages/goldmine/faq";
 import { EtherContext } from "../context/EtherContext";
 
 export const Layout: FC = ({ children }) => {
@@ -176,13 +176,6 @@ export const Layout: FC = ({ children }) => {
           </Route>
           <Route path="/goldmine/faq">
             <FAQ />
-          </Route>
-          <Route path="/goldmine">
-            <GoldMine
-              selectedAddress={selectedAddress}
-              goldContract={goldContract}
-              roeWrapperContract={roeWrapperContract}
-            />
           </Route>
         </Switch> */}
       </div>

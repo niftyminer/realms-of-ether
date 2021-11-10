@@ -1,15 +1,15 @@
 import { Container } from "nes-react";
 import { FC } from "react";
-import { Row } from "../components/Row";
+import { Row } from "../../components/Row";
 
-const dragonCavern = require("../assets/dragon_cavern.png").default;
-const goldMine = require("../assets/gold_mine.png").default;
-const stonePit = require("../assets/stone_pit.png").default;
-const timberCamp = require("../assets/timber_camp.png").default;
-const towerOfDragons = require("../assets/tower_of_dragons.png").default;
+const dragonCavern = "/assets/dragon_cavern.png";
+const goldMine = "/assets/gold_mine.png";
+const stonePit = "/assets/stone_pit.png";
+const timberCamp = "/assets/timber_camp.png";
+const towerOfDragons = "/assets/tower_of_dragons.png";
 
-const dragonOfWisdom = require("../assets/dragon_of_wisdom.png").default;
-const dragonOfPower = require("../assets/dragon_of_power.png").default;
+const dragonOfWisdom = "/assets/dragon_of_wisdom.png";
+const dragonOfPower = "/assets/dragon_of_power.png";
 
 export const Learn: FC = () => {
   return (
@@ -158,3 +158,5 @@ const Building: FC<{ name: string; description: string; image: any }> = ({
     </Row>
   );
 };
+
+export default Learn;
