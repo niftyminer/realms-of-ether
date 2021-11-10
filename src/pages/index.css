@@ -57,6 +57,9 @@ table td:last-child {
   animation: fadeinout 2s ease 1;
   animation-iteration-count: infinite;
 }
+.spinner i {
+  margin: 0 20px;
+}
 
 @keyframes fadeinout {
   0% {

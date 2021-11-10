@@ -1,4 +1,4 @@
-import { FC, useState, useCallback } from "react";
+import { FC, useState, useCallback, useEffect } from "react";
 import { ethers } from "ethers";
 import Link from "next/link";
 import { Wallet } from "./Wallet";
@@ -7,16 +7,12 @@ import { roeABI } from "../contracts/RealmsOfEther";
 import { roeWrapperABI } from "../contracts/RealmsOfEtherWrapper";
 import { goldABI } from "../contracts/Gold";
 import { Container, Icon } from "nes-react";
-import { Inspector } from "../pages/Inspector";
-import { Learn } from "../pages/learn";
-import { GoldMine } from "../pages/goldmine";
 import { Donation } from "./Donation";
 import {
   GOLD_CONTRACT_ADDRESS,
   ROE_CONTRACT_ADDRESS,
   ROE_WRAPPER_CONTRACT_ADDRESS,
 } from "../addresses";
-import { FAQ } from "../pages/goldmine/faq";
 import { EtherContext } from "../context/EtherContext";
 
 export const Layout: FC = ({ children }) => {
@@ -64,8 +60,22 @@ export const Layout: FC = ({ children }) => {
     [intializeEthers]
   );
 
+  useEffect(() => {
+    async function getSelectedAddress() {
+      const [selectedAddress] = await getEthereumClient().request({
+        method: "eth_accounts",
+      });
+      if (selectedAddress) {
+        initialize(selectedAddress);
+      }
+    }
+    getSelectedAddress();
+  }, []);
+
   const connectWallet = useCallback(async () => {
-    const [selectedAddress] = await getEthereumClient().enable();
+    const [selectedAddress] = await getEthereumClient().request({
+      method: "eth_requestAccounts",
+    });
     initialize(selectedAddress);
 
     getEthereumClient().on("accountsChanged", ([newAddress]: [string]) => {
@@ -127,7 +137,7 @@ export const Layout: FC = ({ children }) => {
         </div>
         <Wallet
           address={selectedAddress}
-          connectWallet={() => connectWallet()}
+          connectWallet={connectWallet}
           networkError={networkError}
           dismiss={() => setNetworkError(undefined)}
         />
@@ -170,14 +180,6 @@ export const Layout: FC = ({ children }) => {
         >
           {children}
         </EtherContext.Provider>
-        {/* <Switch>
-          <Route path="/learn">
-            <Learn />
-          </Route>
-          <Route path="/goldmine/faq">
-            <FAQ />
-          </Route>
-        </Switch> */}
       </div>
       <Donation />
       <div

@@ -358,8 +358,18 @@ export const GoldMine: FC = () => {
                 </Table>
               </div>
               {isLoading ? (
-                <div style={{ paddingLeft: "45%" }}>
-                  <Icon className="spinner" icon="star" medium />
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 20,
+                  }}
+                  className="spinner"
+                >
+                  <Icon icon="star" medium />
+                  <span>Loading...</span>
+                  <Icon icon="star" medium />
                 </div>
               ) : (
                 <>
