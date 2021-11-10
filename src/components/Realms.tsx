@@ -5,6 +5,7 @@ import {
   findFortressNumber,
   calculateYear,
   FortressData,
+  displayName,
 } from "../metadata";
 
 export const Realms: FC<{
@@ -65,7 +66,7 @@ export const Realms: FC<{
                       data-text={
                         fortress != null
                           ? `index: ${findFortressNumber(x, y)}
-name: ${fortress.name}
+name: ${displayName(fortress.name)}
 position: x: ${fortress.x} y: ${fortress.y}
 `
                           : x === "0" && y === "0"

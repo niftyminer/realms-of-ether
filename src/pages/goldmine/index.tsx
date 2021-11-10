@@ -1,20 +1,20 @@
-import { FC, useEffect, useState } from "react";
-import { BigNumber, constants, Contract, Event } from "ethers";
+import React, { FC, useContext, useEffect, useState } from "react";
+import { BigNumber, constants, Event } from "ethers";
 import { Button, Checkbox, Container, Icon, Table } from "nes-react";
-import { Row } from "../components/Row";
-import { metadata } from "../metadata";
-import { GOLD_CONTRACT_ADDRESS } from "../addresses";
+import { Row } from "../../components/Row";
+import { metadata } from "../../metadata";
+import { GOLD_CONTRACT_ADDRESS } from "../../addresses";
 import { formatEther } from "@ethersproject/units";
-import { NavLink } from "react-router-dom";
+import { EtherContext } from "../../context/EtherContext";
+import Link from "next/link";
 
-const gold = require("../assets/gold.png").default;
-const castle = require("../assets/castle.png").default;
+const gold = "/assets/gold.png";
+const castle = "assets/castle.png";
 
-export const GoldMine: FC<{
-  selectedAddress: string | undefined;
-  goldContract: Contract | undefined;
-  roeWrapperContract: Contract | undefined;
-}> = ({ selectedAddress, goldContract, roeWrapperContract }) => {
+export const GoldMine: FC = () => {
+  const { selectedAddress, goldContract, roeWrapperContract } =
+    useContext(EtherContext);
+
   const [approved, setApproved] = useState(false);
   const [rewards, setRewards] = useState(constants.Zero);
   const [goldBalance, setGoldBalance] = useState("0");
@@ -262,9 +262,10 @@ export const GoldMine: FC<{
           to the right place. If you hand over the keys to your Castle, you will
           earn GOLD, until you reclaim your fortress.
           <br />
-          <br /> Only a <NavLink to="/goldmine/faq">
-            fortune teller
-          </NavLink>{" "}
+          <br /> Only a{" "}
+          <Link href="/goldmine/faq">
+            <a>fortune teller</a>
+          </Link>{" "}
           could tell, what all this means...
         </Container>
         <div style={{ padding: 30 }}>
@@ -495,3 +496,5 @@ const limitDecimals = (str: string) => {
     return str;
   }
 };
+
+export default GoldMine;

@@ -1,7 +1,6 @@
 import { FC, useState, useCallback } from "react";
 import { ethers } from "ethers";
-import { Switch, Route, NavLink } from "react-router-dom";
-
+import Link from "next/link";
 import { Wallet } from "./Wallet";
 import { getEthereumClient } from "../utils/ethereum";
 import { roeABI } from "../contracts/RealmsOfEther";
@@ -10,7 +9,7 @@ import { goldABI } from "../contracts/Gold";
 import { Container, Icon } from "nes-react";
 import { Inspector } from "../pages/Inspector";
 import { Learn } from "../pages/Learn";
-import { GoldMine } from "../pages/GoldMine";
+import { GoldMine } from "../pages/goldmine";
 import { Donation } from "./Donation";
 import {
   GOLD_CONTRACT_ADDRESS,
@@ -18,10 +17,11 @@ import {
   ROE_WRAPPER_CONTRACT_ADDRESS,
 } from "../addresses";
 import { FAQ } from "../pages/FAQ";
+import { EtherContext } from "../context/EtherContext";
 
-export const App: FC = () => {
-  const [selectedAddress, setSelectedAddress] = useState<string | undefined>();
+export const Layout: FC = ({ children }) => {
   const [networkError, setNetworkError] = useState<string | undefined>();
+  const [selectedAddress, setSelectedAddress] = useState<string | undefined>();
   const [roeContract, setRoeContract] = useState<undefined | ethers.Contract>();
   const [roeWrapperContract, setRoeWrapperContract] = useState<
     undefined | ethers.Contract
@@ -29,6 +29,7 @@ export const App: FC = () => {
   const [goldContract, setGoldContract] = useState<
     undefined | ethers.Contract
   >();
+
   const resetState = useCallback(() => {
     setSelectedAddress(undefined);
     setNetworkError(undefined);
@@ -108,21 +109,21 @@ export const App: FC = () => {
             alignItems: "center",
           }}
         >
-          <NavLink to="/" style={{ textDecoration: "none", color: "black" }}>
-            <h3>Inspector</h3>
-          </NavLink>
-          <NavLink
-            to="/goldmine"
-            style={{ textDecoration: "none", color: "black" }}
-          >
-            <h3>Gold Mine</h3>
-          </NavLink>
-          <NavLink
-            to="/learn"
-            style={{ textDecoration: "none", color: "black" }}
-          >
-            <h3> Learn</h3>
-          </NavLink>
+          <Link href="/">
+            <a style={{ textDecoration: "none", color: "black" }}>
+              <h3>Inspector</h3>
+            </a>
+          </Link>
+          <Link href="/goldmine">
+            <a style={{ textDecoration: "none", color: "black" }}>
+              <h3>Gold Mine</h3>
+            </a>
+          </Link>
+          <Link href="/learn">
+            <a style={{ textDecoration: "none", color: "black" }}>
+              <h3> Learn</h3>
+            </a>
+          </Link>
         </div>
         <Wallet
           address={selectedAddress}
@@ -141,9 +142,11 @@ export const App: FC = () => {
           paddingBottom: 15,
         }}
       >
-        <NavLink to="/" style={{ textDecoration: "none", color: "black" }}>
-          <h1>Realms Of Ether Revive</h1>
-        </NavLink>
+        <Link href="/">
+          <a style={{ textDecoration: "none", color: "black" }}>
+            <h1>Realms Of Ether Revive</h1>
+          </a>
+        </Link>
       </div>
       <div
         style={{
@@ -157,7 +160,17 @@ export const App: FC = () => {
           alignItems: "center",
         }}
       >
-        <Switch>
+        <EtherContext.Provider
+          value={{
+            selectedAddress,
+            roeContract,
+            goldContract,
+            roeWrapperContract,
+          }}
+        >
+          {children}
+        </EtherContext.Provider>
+        {/* <Switch>
           <Route path="/learn">
             <Learn />
           </Route>
@@ -171,14 +184,7 @@ export const App: FC = () => {
               roeWrapperContract={roeWrapperContract}
             />
           </Route>
-          <Route path="/">
-            <Inspector
-              selectedAddress={selectedAddress}
-              roeContract={roeContract}
-              roeWrapperContract={roeWrapperContract}
-            />
-          </Route>
-        </Switch>
+        </Switch> */}
       </div>
       <Donation />
       <div

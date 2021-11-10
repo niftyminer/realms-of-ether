@@ -9,6 +9,7 @@ import {
   calculateYear,
   calculateYearRarity,
   FortressData,
+  displayName,
 } from "../metadata";
 
 export const Traits: FC<{ fortressData: FortressData }> = ({
@@ -26,7 +27,7 @@ export const Traits: FC<{ fortressData: FortressData }> = ({
           </thead>
           <tbody>
             <tr>
-              <td>{fortressData.name}</td>
+              <td>{displayName(fortressData.name)}</td>
               <td>{calculateNameRarity(fortressData.name)} has this trait</td>
             </tr>
           </tbody>

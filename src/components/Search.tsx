@@ -4,8 +4,6 @@ import { Container, TextInput, Button } from "nes-react";
 import { Row } from "./Row";
 import { FortressData } from "../metadata";
 
-const castle = require("../assets/castle.png").default;
-
 export const Search: FC<{
   searchResult: FortressData | null | undefined;
   xInput: string;
@@ -27,7 +25,7 @@ export const Search: FC<{
       <Container rounded title="Search">
         <Row>
           <Container rounded>
-            <img width={150} src={castle} alt="fortress" />
+            <img width={150} src="/assets/castle.png" alt="fortress" />
           </Container>
           <div
             style={{

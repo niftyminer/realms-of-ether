@@ -6,6 +6,10 @@ export type FortressData = {
   blockNumber: number;
 };
 
+export const displayName = (name: string): string => {
+  return name.replace(/[\u0000-\u0010]/g, "");
+};
+
 export const findFortress = (x: string, y: string) => {
   return metadata.find((f) => f.x === x && f.y === y);
 };

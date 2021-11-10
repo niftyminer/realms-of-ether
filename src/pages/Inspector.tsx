@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, useCallback } from "react";
+import { FC, useState, useEffect, useCallback, useContext } from "react";
 import { BigNumber, Contract } from "ethers";
 import { findFortress, FortressData } from "../metadata";
 import { useQueryString } from "../utils/queryState";
@@ -9,12 +9,11 @@ import { FoundMessage } from "../components/FoundMessage";
 import { Search } from "../components/Search";
 import { Troups } from "../components/Troups";
 import { Buildings } from "../components/Buildings";
+import { EtherContext } from "../context/EtherContext";
 
-export const Inspector: FC<{
-  selectedAddress: string | undefined;
-  roeContract: Contract | undefined;
-  roeWrapperContract: Contract | undefined;
-}> = ({ selectedAddress, roeContract, roeWrapperContract }) => {
+export const Inspector: FC = () => {
+  const { selectedAddress, roeContract, roeWrapperContract } =
+    useContext(EtherContext);
   const [xInput, setXInput] = useQueryString("x", "");
   const [yInput, setYInput] = useQueryString("y", "");
   const [searchResult, setSearchResult] = useState<
@@ -111,3 +110,5 @@ export const Inspector: FC<{
     </>
   );
 };
+
+export default Inspector;

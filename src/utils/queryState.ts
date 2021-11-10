@@ -1,3 +1,4 @@
+import { useRouter } from "next/dist/client/router";
 import qs from "query-string";
 import { useState, useCallback } from "react";
 
@@ -25,17 +26,15 @@ const setQueryStringWithoutPageReload = (qsValue: string) => {
 const setQueryStringValue = (
   key: string,
   value: string,
-  queryString = window.location.search
+  queryString?: string
 ) => {
-  const values = qs.parse(queryString);
+  const values = qs.parse(queryString || window.location.search);
   const newQsValue = qs.stringify({ ...values, [key]: value });
   setQueryStringWithoutPageReload(`?${newQsValue}`);
 };
 
-const getQueryStringValue = (
-  key: string,
-  queryString = window.location.search
-) => {
-  const values = qs.parse(queryString);
+const getQueryStringValue = (key: string, queryString?: string) => {
+  const router = useRouter();
+  const values = queryString ? qs.parse(queryString) : router.query;
   return values[key] as string | null;
 };
