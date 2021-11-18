@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Container, TextInput, Button } from "nes-react";
 import { Row } from "./Row";
@@ -6,20 +6,19 @@ import { FortressData } from "../metadata";
 
 export const Search: FC<{
   searchResult: FortressData | null | undefined;
-  xInput: string;
-  yInput: string;
-  setXInput: (x: string) => void;
-  setYInput: (y: string) => void;
-
-  displaySearchResult: () => void;
-}> = ({
-  searchResult,
-  xInput,
-  yInput,
-  displaySearchResult,
-  setXInput,
-  setYInput,
-}) => {
+  xInput?: string;
+  yInput?: string;
+  setCoords: (x?: string, y?: string) => void;
+}> = ({ searchResult, xInput, yInput, setCoords }) => {
+  const [x, setX] = useState(xInput ?? "");
+  const [y, setY] = useState(yInput ?? "");
+  useEffect(() => {
+    setX(xInput ?? "");
+    setY(yInput ?? "");
+  }, [xInput, yInput]);
+  const handleXChange = useCallback((e) => setX(e.target.value), []);
+  const handleYChange = useCallback((e) => setY(e.target.value), []);
+  const handleSearch = useCallback(() => setCoords(x, y), [x, y]);
   return (
     <div style={{ padding: 10 }}>
       <Container rounded title="Search">
@@ -38,15 +37,13 @@ export const Search: FC<{
           >
             <TextInput
               label="X coordinate"
-              value={xInput as string}
-              // @ts-ignore
-              onChange={(e) => setXInput(e.target.value)}
+              value={x as string}
+              onChange={handleXChange as () => void}
             />
             <TextInput
               label="Y coordinate"
-              value={yInput as string}
-              // @ts-ignore
-              onChange={(e) => setYInput(e.target.value)}
+              value={y as string}
+              onChange={handleYChange as () => void}
             />
           </div>
 
@@ -57,11 +54,7 @@ export const Search: FC<{
               flexDirection: "column",
             }}
           >
-            <Button
-              primary
-              // @ts-ignore
-              onClick={displaySearchResult}
-            >
+            <Button primary {...{ onClick: handleSearch }}>
               Search
             </Button>
             <div style={{ paddingTop: "15px", paddingLeft: "10px" }}>

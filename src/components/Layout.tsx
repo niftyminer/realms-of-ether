@@ -119,7 +119,7 @@ export const Layout: FC = ({ children }) => {
             alignItems: "center",
           }}
         >
-          <Link href="/">
+          <Link href="/inspect">
             <a style={{ textDecoration: "none", color: "black" }}>
               <h3>Inspector</h3>
             </a>

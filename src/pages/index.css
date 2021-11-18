@@ -20,9 +20,14 @@ table td:last-child {
   width: 100%;
 }
 
-.tooltip {
+table.nes-table td.tooltip {
+  padding: 0;
   position: relative; /* making the .tooltip span a container for the tooltip text */
   border-bottom: 1px dashed #000; /* little indicater to indicate it's hoverable */
+}
+
+.tooltip:hover {
+  background: #ddd;
 }
 
 .tooltip:before {
@@ -34,8 +39,7 @@ table td:last-child {
   transform: translateY(-50%);
 
   /* move to right */
-  left: 100%;
-  margin-left: 15px; /* and add a small left margin */
+  left: 140%;
 
   /* basic styles */
   width: 200px;
@@ -44,7 +48,7 @@ table td:last-child {
   background: #000;
   color: #fff;
   text-align: center;
-
+  pointer-events: none;
   display: none; /* hide by default */
 }
 

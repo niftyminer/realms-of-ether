@@ -74,6 +74,9 @@ position: x: ${fortress.x} y: ${fortress.y}
                           : "Emptiness"
                       }
                       style={{
+                        width: 35,
+                        height: 35,
+                        textAlign: "center",
                         backgroundColor: getColor(
                           fortressData,
                           ownerHashes,
@@ -87,16 +90,21 @@ position: x: ${fortress.x} y: ${fortress.y}
                       key={x}
                     >
                       {x === "0" && y === "0" ? (
-                        "Ξ"
+                        <span style={{ position: "relative", top: 2, left: 2 }}>
+                          Ξ
+                        </span>
                       ) : metadata.find(
                           (f) => f.x === x.toString() && f.y === y.toString()
                         ) != null ? (
                         <button
                           style={{
-                            margin: -8,
+                            margin: 0,
                             border: 0,
                             backgroundColor: "transparent",
                             outline: "none",
+                            padding: "7px 11px",
+                            width: 35,
+                            height: 35,
                           }}
                           onClick={() => handleSelectTile(x, y)}
                         >

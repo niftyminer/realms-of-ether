@@ -51,9 +51,6 @@ export const Buildings: FC<{
     func();
   }, [fortressData, contract]);
 
-  if (buildings == null) {
-    return null;
-  }
   return (
     <div style={{ padding: 10 }}>
       <Container rounded title="Buildings">
@@ -67,23 +64,23 @@ export const Buildings: FC<{
           <tbody>
             <tr>
               <td>Gold Mine</td>
-              <td>{buildings.goldMine}</td>
+              <td>{buildings && buildings.goldMine}</td>
             </tr>
             <tr>
               <td>Timber Camp</td>
-              <td>{buildings.timberCamp}</td>
+              <td>{buildings && buildings.timberCamp}</td>
             </tr>
             <tr>
               <td>Stone Pit</td>
-              <td>{buildings.stonePit}</td>
+              <td>{buildings && buildings.stonePit}</td>
             </tr>
             <tr>
               <td>Tower of Dragons</td>
-              <td>{buildings.towerOfDragons}</td>
+              <td>{buildings && buildings.towerOfDragons}</td>
             </tr>
             <tr>
               <td>Dragon Cavern</td>
-              <td>{buildings.dragonCavern}</td>
+              <td>{buildings && buildings.dragonCavern}</td>
             </tr>
           </tbody>
         </Table>
