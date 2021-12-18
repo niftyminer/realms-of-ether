@@ -11,7 +11,7 @@ import Link from "next/link";
 const gold = "/assets/gold.png";
 const castle = "assets/castle.png";
 
-export const GoldMine: FC = () => {
+const GoldMine: FC = () => {
   const { selectedAddress, goldContract, roeWrapperContract } =
     useContext(EtherContext);
 

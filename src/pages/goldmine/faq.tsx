@@ -5,7 +5,7 @@ import { AddToken } from "../../components/AddToken";
 const dragonOfWisdom = "/assets/dragon_of_wisdom.png";
 const dragonOfPower = "/assets/dragon_of_power.png";
 
-export const FAQ: FC = () => {
+const FAQ: FC = () => {
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", alignItems: "flex-end" }}>

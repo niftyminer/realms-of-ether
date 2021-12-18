@@ -57,6 +57,13 @@ table.nes-table td.tooltip {
   z-index: 10000;
 }
 
+.sample-canvas {
+  width: 1500px;
+  height: 500px;
+  transform: scale(0.8);
+  transform-origin: center;
+}
+
 .spinner {
   animation: fadeinout 2s ease 1;
   animation-iteration-count: infinite;

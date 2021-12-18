@@ -1,7 +1,6 @@
 import { FC, useState, useEffect, useCallback, useContext } from "react";
-import { BigNumber, Contract } from "ethers";
+import { BigNumber } from "ethers";
 import { findFortress, FortressData } from "../../metadata";
-import { useQueryString } from "../../utils/queryState";
 import { Resources } from "../../components/Resources";
 import { Traits } from "../../components/Traits";
 import { Realms } from "../../components/Realms";
