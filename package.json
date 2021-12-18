@@ -8,6 +8,7 @@
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "@types/fabric": "^4.5.6",
+    "@walletconnect/web3-provider": "^1.7.0",
     "ethers": "^5.4.5",
     "fabric": "^4.6.0",
     "fabricjs-react": "^1.0.8",
