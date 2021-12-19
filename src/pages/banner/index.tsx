@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { MoralisProvider } from "react-moralis";
-import Editor from "./Editor";
+import Editor from "../../components/banner-editor/Editor";
 
 const serverUrl = process.env.MORALIS_SERVER_URL ?? "";
 const appId = process.env.MORALIS_APPLICATION_ID ?? "";
