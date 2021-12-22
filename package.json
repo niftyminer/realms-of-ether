@@ -92,7 +92,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "cp canvas_lib64/*so.1 node_modules/canvas/build/Release/ && next build",
+    "build": "next build",
     "start": "next start"
   },
   "eslintConfig": {
