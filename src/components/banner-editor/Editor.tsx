@@ -1,8 +1,12 @@
 import { FC, useCallback, useEffect } from "react";
 import { fabric } from "fabric";
 import { useMoralis, useNFTBalances } from "react-moralis";
-import { Button, TextInput } from "nes-react";
-import { FabricJSCanvas, useFabricJSEditor } from "fabricjs-react";
+import { Button, Container, TextInput } from "nes-react";
+import {
+  FabricJSCanvas,
+  FabricJSEditor,
+  useFabricJSEditor,
+} from "fabricjs-react";
 import { getColorFilter } from "./helper";
 import { useState } from "react";
 import { displayName, findFortress } from "../../metadata";
@@ -44,11 +48,15 @@ const AuthenticatedView: FC = () => {
         },
         colorStops: [
           {
-            color: "#D6F185",
+            color: "#0F2027",
             offset: 0,
           },
           {
-            color: "grey",
+            color: "#203A43",
+            offset: 0.5,
+          },
+          {
+            color: "#2C5364",
             offset: 1,
           },
         ],
@@ -66,6 +74,18 @@ const AuthenticatedView: FC = () => {
         editor?.canvas.centerObject(img1);
       });
     }
+  }, [editor]);
+
+  useEffect(() => {
+    const deleteListener = (e: KeyboardEvent) => {
+      if (e.key === "Backspace" || e.key === "Delete") {
+        editor?.canvas.remove(editor?.canvas.getActiveObject());
+      }
+    };
+    document.addEventListener("keydown", deleteListener);
+    return () => {
+      document.removeEventListener("keydown", deleteListener);
+    };
   }, [editor]);
 
   useEffect(() => {
@@ -94,53 +114,100 @@ const AuthenticatedView: FC = () => {
           display: "flex",
           width: "100%",
           flexDirection: "row",
-          alignItems: "center",
+          alignItems: "flex-start",
           justifyContent: "center",
         }}
       >
-        <Button
+        <Container
+          title="Select castle"
           // @ts-ignore
-          onClick={() => {
-            editor?.canvas.remove(editor?.canvas.getActiveObject());
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "center",
           }}
         >
-          Delete Selection
-        </Button>
-        <Button
-          // @ts-ignore
-          onClick={() => {
-            editor?.canvas.discardActiveObject();
-            editor?.canvas.getElement().toBlob((blob) => {
-              const blobUrl = URL.createObjectURL(blob!);
-              const link = document.createElement("a");
-              link.href = blobUrl;
-              link.download = "banner.png";
-              document.body.appendChild(link);
-              link.dispatchEvent(
-                new MouseEvent("click", {
-                  bubbles: true,
-                  cancelable: true,
-                  view: window,
-                })
-              );
-              document.body.removeChild(link);
-            });
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              X
+              <TextInput
+                style={{ width: 100 }}
+                value={x as string}
+                onChange={handleXChange as () => void}
+              />
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              Y
+              <TextInput
+                style={{ width: 100 }}
+                value={y as string}
+                onChange={handleYChange as () => void}
+              />
+            </div>
+          </div>
+        </Container>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "center",
           }}
         >
-          Save Image
-        </Button>
-        X Coordinate
-        <TextInput
-          style={{ width: 100 }}
-          value={x as string}
-          onChange={handleXChange as () => void}
-        />
-        Y Coordinate
-        <TextInput
-          style={{ width: 100 }}
-          value={y as string}
-          onChange={handleYChange as () => void}
-        />
+          <Button
+            // @ts-ignore
+            onClick={() => {
+              addTextLabel(editor);
+            }}
+          >
+            Add Text
+          </Button>
+          <Button
+            // @ts-ignore
+            onClick={() => {
+              editor?.canvas.discardActiveObject();
+              editor?.canvas.getElement().toBlob((blob) => {
+                const blobUrl = URL.createObjectURL(blob!);
+                const link = document.createElement("a");
+                link.href = blobUrl;
+                link.download = "banner.png";
+                document.body.appendChild(link);
+                link.dispatchEvent(
+                  new MouseEvent("click", {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window,
+                  })
+                );
+                document.body.removeChild(link);
+              });
+            }}
+          >
+            Save Image
+          </Button>
+        </div>
       </div>
       <div style={{ display: "flex", flexWrap: "wrap" }}>
         {data != null &&
@@ -156,30 +223,28 @@ const AuthenticatedView: FC = () => {
                 imageUrl = imageUrl.replace("/ipfs/ipfs/", "/ipfs/");
               }
               return (
-                <div
-                  style={{ width: 100, padding: 10 }}
-                  onClick={() => {
-                    fabric.Image.fromURL(
-                      imageUrl,
-                      (oImg) => {
-                        const scale = 200 / (oImg.width ?? 100);
-
-                        var img1 = oImg.set({
-                          scaleX: scale,
-                          scaleY: scale,
-                        });
-
-                        if (isWizards(nftWithImage.token_address)) {
-                          removeWizardsBackground(img1);
-                        }
-                        editor?.canvas.add(img1);
-                        editor?.canvas.centerObject(img1);
-                      },
-                      { crossOrigin: "anonymous" }
-                    );
-                  }}
-                >
-                  <img alt={nftWithImage.name} src={imageUrl} width="100%" />
+                <div>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <button
+                      style={{ fontFamily: "monospace", margin: 5 }}
+                      onClick={() => {
+                        addImage(editor, imageUrl, false);
+                      }}
+                    >
+                      Insert
+                    </button>
+                    <button
+                      style={{ fontFamily: "monospace", margin: 5 }}
+                      onClick={() => {
+                        addImage(editor, imageUrl, true);
+                      }}
+                    >
+                      without Background
+                    </button>
+                  </div>
+                  <div style={{ width: 100, padding: 10 }}>
+                    <img alt={nftWithImage.name} src={imageUrl} width="100%" />
+                  </div>
                 </div>
               );
             })}
@@ -188,25 +253,60 @@ const AuthenticatedView: FC = () => {
   );
 };
 
-const isWizards = (address: string) =>
-  address === "0x521f9c7505005cfa19a8e5786a9c3c9c9f5e6f42";
+const addImage = (
+  editor: FabricJSEditor | undefined,
+  imageUrl: string,
+  removeBackground: boolean
+) => {
+  fabric.Image.fromURL(
+    imageUrl,
+    (oImg) => {
+      const scale = 200 / (oImg.width ?? 100);
 
-const removeWizardsBackground = (img: fabric.Object) => {
-  var filterRed = getColorFilter("#1E0201");
-  var filterGreen = getColorFilter("#1E0201");
-  var filterBlue = getColorFilter("#1E0201");
-  var filterBlack = getColorFilter("#1E0201");
+      var img1 = oImg.set({
+        scaleX: scale,
+        scaleY: scale,
+      });
 
-  // @ts-ignore
-  img.filters.push(filterRed);
-  // @ts-ignore
-  img.filters.push(filterGreen);
-  // @ts-ignore
-  img.filters.push(filterBlue);
-  // @ts-ignore
-  img.filters.push(filterBlack);
-  // @ts-ignore
-  img.applyFilters();
+      if (removeBackground) {
+        const backgroundColor = getBackgroundColor(oImg).toHex();
+        console.log("@@@", backgroundColor);
+        // @ts-ignore
+        img1.filters.push(getColorFilter(`#${backgroundColor}`));
+        // @ts-ignore
+        img1.applyFilters();
+      }
+
+      editor?.canvas.add(img1);
+
+      editor?.canvas.centerObject(img1);
+    },
+    { crossOrigin: "anonymous" }
+  );
+};
+const addTextLabel = (editor: FabricJSEditor | undefined) => {
+  if (editor?.canvas != null) {
+    const label = new fabric.IText("Click to edit", {
+      fontFamily: "Press Start 2P",
+      fontSize: 28,
+      top: 20,
+    });
+    editor?.canvas.add(label);
+    editor?.canvas.centerObject(label);
+  }
+};
+
+const getBackgroundColor = (img: fabric.Image) => {
+  var canvas = document.createElement("canvas");
+  var context = canvas.getContext("2d");
+  const imgElement = img.getElement();
+  context?.drawImage(imgElement, 0, 0);
+  const rgba = context?.getImageData(1, 1, 1, 1).data ?? [];
+  console.log("@@@", rgba);
+  canvas.remove();
+  return fabric.Color.fromRgba(
+    `rgb(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3]})`
+  );
 };
 
 export default Editor;
