@@ -131,9 +131,17 @@ export const Layout: FC = ({ children }) => {
           </Link>
           <Link href="/learn">
             <a style={{ textDecoration: "none", color: "black" }}>
-              <h3> Learn</h3>
+              <h3>Learn</h3>
             </a>
           </Link>
+
+          <a
+            href="https://mango-puck-2f0.notion.site/Realms-DAO-4db97df04c8f4cf8a5e163abff56e266"
+            style={{ textDecoration: "none", color: "black" }}
+            target="_blank"
+          >
+            <h3>DAO</h3>
+          </a>
         </div>
         <Wallet
           address={selectedAddress}
