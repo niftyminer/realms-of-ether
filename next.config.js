@@ -17,4 +17,13 @@ module.exports = {
     };
     return conf;
   },
+  async redirects() {
+    return [
+      {
+        source: '/dao',
+        destination: 'https://mango-puck-2f0.notion.site/Realms-DAO-4db97df04c8f4cf8a5e163abff56e266',
+        permanent: true,
+      },
+    ]
+  },
 };
