@@ -1,5 +1,5 @@
 import React, { FC, useContext, useEffect, useState } from "react";
-import { BigNumber, constants, Event } from "ethers";
+import { BigNumber, constants, ethers, Event } from "ethers";
 import { Button, Checkbox, Container, Icon, Table } from "nes-react";
 import { Row } from "../../components/Row";
 import { metadata } from "../../metadata";
@@ -7,6 +7,8 @@ import { GOLD_CONTRACT_ADDRESS } from "../../addresses";
 import { formatEther } from "@ethersproject/units";
 import { EtherContext } from "../../context/EtherContext";
 import Link from "next/link";
+import { Contract, Provider } from 'ethers-multicall';
+import { goldABI } from "../../contracts/Gold";
 
 const gold = "/assets/gold.png";
 const castle = "assets/castle.png";
@@ -75,6 +77,15 @@ const GoldMine: FC = () => {
   useEffect(() => {
     const func = async () => {
       if (goldContract != null) {
+        const provider = new ethers.providers.Web3Provider(
+          (window as any).ethereum,
+          "any"
+        );
+    
+        const ethcallProvider = new Provider(provider);
+
+        await ethcallProvider.init(); // Only required when `chainId` is not provided in the `Provider` constructor
+      
         goldContract.on(
           goldContract.filters.FortressStaked(),
           async (id: BigNumber) => {
@@ -94,12 +105,16 @@ const GoldMine: FC = () => {
         const events = await goldContract.queryFilter(eventFilter);
         const allStakedIds = events.map((e: Event) => e?.args?.[0]);
         const stakedForSelectedAddress: BigNumber[] = [];
-        for (const id of allStakedIds) {
-          const staker = (await goldContract.getStaker(id)).toLowerCase();
+
+        // multicall gold 
+        const multicallGoldContract = new Contract(GOLD_CONTRACT_ADDRESS, goldABI);
+        const allStakers = await ethcallProvider.all(allStakedIds.map((id: string) => multicallGoldContract.getStaker(id)));
+        allStakers.map((staker: string) => staker.toLowerCase()).forEach((staker, index) => {
           if (staker === selectedAddress) {
-            stakedForSelectedAddress.push(id);
+            stakedForSelectedAddress.push(allStakedIds[index]);
           }
-        }
+        })
+
         const hexValues = stakedForSelectedAddress.map((v) => v.toString());
         const uniqueHexValues = [...new Set([...hexValues])];
 
