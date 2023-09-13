@@ -47,13 +47,13 @@ export const calculateDistanceRarity = (x: string, y: string) => {
 };
 
 export const calculateYear = (blockNumber: number) => {
-  if (blockNumber < 4826545) {
+  if (blockNumber < 4832686) {
     return 2017;
-  } else if (blockNumber < 4832456) {
+  } else if (blockNumber < 6988615) {
     return 2018;
-  } else if (blockNumber < 6988382) {
+  } else if (blockNumber < 9193266) {
     return 2019;
-  } else if (blockNumber < 9193047) {
+  } else if (blockNumber < 11565019) {
     return 2020;
   } else {
     return 2021;
