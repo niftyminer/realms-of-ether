@@ -78,8 +78,11 @@ const AuthenticatedView: FC = () => {
 
   useEffect(() => {
     const deleteListener = (e: KeyboardEvent) => {
-      if (e.key === "Backspace" || e.key === "Delete") {
-        editor?.canvas.remove(editor?.canvas.getActiveObject());
+      if ((e.key === "Backspace" || e.key === "Delete") && editor != null) {
+        const obj = editor.canvas.getActiveObject();
+        if (obj != null) {
+          editor.canvas.remove(obj);
+        }
       }
     };
     document.addEventListener("keydown", deleteListener);
@@ -188,7 +191,7 @@ const AuthenticatedView: FC = () => {
             // @ts-ignore
             onClick={() => {
               editor?.canvas.discardActiveObject();
-              editor?.canvas.getElement().toBlob((blob) => {
+              editor?.canvas.getElement().toBlob((blob: any) => {
                 const blobUrl = URL.createObjectURL(blob!);
                 const link = document.createElement("a");
                 link.href = blobUrl;
@@ -213,8 +216,8 @@ const AuthenticatedView: FC = () => {
         {data != null &&
           data.result != null &&
           data.result
-            .filter((nft) => nft.metadata != null && nft.metadata.image != null)
-            .map((nftWithImage) => {
+            .filter((nft: any) => nft.metadata != null && nft.metadata.image != null)
+            .map((nftWithImage: any) => {
               let imageUrl = nftWithImage.metadata.image as string;
               if (nftWithImage.metadata.image.startsWith("ipfs")) {
                 imageUrl =

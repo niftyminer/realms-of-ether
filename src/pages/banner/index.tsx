@@ -7,7 +7,7 @@ const appId = process.env.MORALIS_APPLICATION_ID ?? "";
 
 const Editor = dynamic(() => import("../../components/banner-editor/Editor"), {
   ssr: false,
-});
+}) as FC;
 
 const BannerEditor: FC = () => {
   return (

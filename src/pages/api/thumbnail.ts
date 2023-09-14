@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import fs from "fs";
 import path from "path";
-import qs from "query-string";
 
 type ThumbnailData = {
   ruler: string | string[];
@@ -20,8 +19,8 @@ export default function handler(
   );
 
   const data: ThumbnailData = {
-    ruler: req.query.ruler,
-    relic: req.query.relic,
+    ruler: req.query.ruler || "",
+    relic: req.query.relic || "",
   };
 
   Object.entries(data).forEach(([key, value]) => {
