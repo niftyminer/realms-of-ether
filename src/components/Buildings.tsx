@@ -1,55 +1,69 @@
-import { Contract } from "@ethersproject/contracts";
-import { BigNumber } from "ethers";
 import { Container, Table } from "nes-react";
 import { FC, useEffect, useState } from "react";
 import { FortressData } from "../metadata";
+import { usePublicClient } from "wagmi";
+import { ROE_CONTRACT_ADDRESS } from "../addresses";
+import { roeABI } from "../contracts/RealmsOfEther";
 
 type BuildingsData = {
-  goldMine: number;
-  timberCamp: number;
-  stonePit: number;
-  towerOfDragons: number;
-  dragonCavern: number;
+  goldMine: bigint;
+  timberCamp: bigint;
+  stonePit: bigint;
+  towerOfDragons: bigint;
+  dragonCavern: bigint;
 };
 
 const BROKEN_BUILDING =
   "0x013fe665d081d447d18c02806c23234ff4e64e732fa7a5814abc87a0dac86737";
 
 export const Buildings: FC<{
-  contract: Contract | undefined;
   fortressData: FortressData | null;
-}> = ({ contract, fortressData }) => {
+}> = ({ fortressData }) => {
   const [buildings, setBuildings] = useState<BuildingsData | null>(null);
+  const publicClient = usePublicClient();
 
   useEffect(() => {
     const func = async () => {
-      if (contract != null && fortressData != null) {
+      if (fortressData != null && publicClient != null) {
         setBuildings(null);
-        const length = await contract.getBuildingIndexLength();
-        const buildingsData: { _level: BigNumber }[] = [];
+        const length = await publicClient.readContract({
+          address: ROE_CONTRACT_ADDRESS,
+          abi: roeABI,
+          functionName: "getBuildingIndexLength",
+        });
+        const buildingsData: { _level: bigint }[] = [];
         for (let i = 0; i < length; i++) {
-          const buildingHash = await contract.getBuildingHash(i);
+          const buildingHash = await publicClient.readContract({
+            address: ROE_CONTRACT_ADDRESS,
+            abi: roeABI,
+            functionName: "getBuildingHash",
+            args: [BigInt(i)],
+          });
           if (buildingHash === BROKEN_BUILDING) {
             continue;
           }
-          const result = await contract.getFortressBuilding(
-            fortressData.hash,
-            buildingHash
-          );
-          buildingsData.push(result);
+          const result = await publicClient.readContract({
+            address: ROE_CONTRACT_ADDRESS,
+            abi: roeABI,
+            functionName: "getFortressBuilding",
+            args: [fortressData.hash as `0x${string}`, buildingHash],
+          });
+          buildingsData.push({
+            _level: result[1],
+          });
         }
 
         setBuildings({
-          goldMine: buildingsData[0]._level.toNumber(),
-          timberCamp: buildingsData[1]._level.toNumber(),
-          stonePit: buildingsData[2]._level.toNumber(),
-          towerOfDragons: buildingsData[3]._level.toNumber(),
-          dragonCavern: buildingsData[4]._level.toNumber(),
+          goldMine: buildingsData[0]._level,
+          timberCamp: buildingsData[1]._level,
+          stonePit: buildingsData[2]._level,
+          towerOfDragons: buildingsData[3]._level,
+          dragonCavern: buildingsData[4]._level,
         });
       }
     };
     func();
-  }, [fortressData, contract]);
+  }, [fortressData, publicClient]);
 
   return (
     <div style={{ padding: 10 }}>

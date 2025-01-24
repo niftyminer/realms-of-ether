@@ -1,41 +1,52 @@
-import { Contract } from "@ethersproject/contracts";
-import { BigNumber } from "ethers";
 import { Container, Table } from "nes-react";
 import { FC, useEffect, useState } from "react";
 import { FortressData } from "../metadata";
-
+import { usePublicClient } from "wagmi";
+import { roeABI } from "../contracts/RealmsOfEther";
+import { ROE_CONTRACT_ADDRESS } from "../addresses";
 type TroupsData = {
-  dragonOfWisdom: number;
-  dragonOfPower: number;
+  dragonOfWisdom: bigint;
+  dragonOfPower: bigint;
 };
 
 export const Troups: FC<{
-  contract: Contract | undefined;
   fortressData: FortressData | null;
-}> = ({ contract, fortressData }) => {
+}> = ({ fortressData }) => {
   const [troups, setTroups] = useState<TroupsData | null>(null);
+  const publicClient = usePublicClient();
 
   useEffect(() => {
     const func = async () => {
-      if (contract != null && fortressData != null) {
-        const length = await contract.getTroupIndexLength();
-        const troupsData: BigNumber[] = [];
+      if (fortressData != null && publicClient != null) {
+        const length = await publicClient.readContract({
+          address: ROE_CONTRACT_ADDRESS,
+          abi: roeABI,
+          functionName: "getTroupIndexLength",
+        });
+        const troupsData: bigint[] = [];
         for (let i = 0; i < length; i++) {
-          const troupHash = await contract.getTroupHash(i);
-          const result = await contract.getFortressTroups(
-            fortressData.hash,
-            troupHash
-          );
+          const troupHash = await publicClient.readContract({
+            address: ROE_CONTRACT_ADDRESS,
+            abi: roeABI,
+            functionName: "getTroupHash",
+            args: [BigInt(i)],
+          });
+          const result = await publicClient.readContract({
+            address: ROE_CONTRACT_ADDRESS,
+            abi: roeABI,
+            functionName: "getFortressTroups",
+            args: [fortressData.hash as `0x${string}`, troupHash],
+          });
           troupsData.push(result);
         }
         setTroups({
-          dragonOfPower: troupsData[0].toNumber(),
-          dragonOfWisdom: troupsData[1].toNumber(),
+          dragonOfPower: troupsData[0],
+          dragonOfWisdom: troupsData[1],
         });
       }
     };
     func();
-  }, [fortressData, contract]);
+  }, [fortressData, publicClient]);
 
   if (troups == null) {
     return null;

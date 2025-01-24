@@ -549,4 +549,4 @@ export const goldABI = [
     stateMutability: "nonpayable",
     type: "function",
   },
-];
+] as const;

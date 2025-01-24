@@ -1,6 +1,9 @@
-import { CSSProperties, FC } from "react";
+import { CSSProperties, FC, ReactNode } from "react";
 
-export const Row: FC<{ style?: CSSProperties }> = ({ children, style }) => {
+export const Row: FC<{ style?: CSSProperties; children?: ReactNode }> = ({
+  children,
+  style,
+}) => {
   return (
     <div
       style={{

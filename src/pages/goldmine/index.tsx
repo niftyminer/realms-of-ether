@@ -1,233 +1,252 @@
-import React, { FC, useContext, useEffect, useState } from "react";
-import { BigNumber, constants, ethers, Event } from "ethers";
+import React, { FC, useEffect, useState } from "react";
 import { Button, Checkbox, Container, Icon, Table } from "nes-react";
 import { Row } from "../../components/Row";
 import { metadata } from "../../metadata";
-import { GOLD_CONTRACT_ADDRESS } from "../../addresses";
-import { formatEther } from "@ethersproject/units";
-import { EtherContext } from "../../context/EtherContext";
+import { GOLD_CONTRACT_ADDRESS, ROE_WRAPPER_CONTRACT_ADDRESS } from "../../addresses";
 import Link from "next/link";
-import { Contract, Provider } from 'ethers-multicall';
 import { goldABI } from "../../contracts/Gold";
+import { useAccount, usePublicClient, useReadContract, useReadContracts, useWatchContractEvent, useWalletClient } from "wagmi";
+import { roeWrapperABI } from "../../contracts/RealmsOfEtherWrapper";
+import { formatEther, parseAbiItem, toHex } from "viem";
 
 const gold = "/assets/gold.png";
 const castle = "assets/castle.png";
 
 const GoldMine: FC = () => {
-  const { selectedAddress, goldContract, roeWrapperContract } =
-    useContext(EtherContext);
+  const { address } = useAccount();
+  const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
 
   const [approved, setApproved] = useState(false);
-  const [rewards, setRewards] = useState(constants.Zero);
-  const [goldBalance, setGoldBalance] = useState("0");
-  const [tfl, setTfl] = useState("0");
-  const [goldSupply, setGoldSupply] = useState("0");
+  const [rewards, setRewards] = useState<bigint>(0n);
   const [fortressIds, setFortressIds] = useState<Record<string, boolean>>({});
   const [rewardByStakeIds, setRewardByStakeIds] = useState<
-    Record<string, BigNumber>
+    Record<string, bigint>
   >({});
-  const [stakedIds, setStakedIds] = useState<BigNumber[] | null>(null);
+  const [stakedIds, setStakedIds] = useState<bigint[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // gold balance
+  const { data: goldBalance } = useReadContract({
+    address: GOLD_CONTRACT_ADDRESS,
+    abi: goldABI,
+    functionName: "balanceOf",
+    args: [address as `0x${string}`],
+  });
+
+  const { data: tfl } = useReadContract({
+    address: ROE_WRAPPER_CONTRACT_ADDRESS,
+    abi: roeWrapperABI,
+    functionName: "balanceOf",
+    args: [GOLD_CONTRACT_ADDRESS],
+  });
+
+  const { data: fortressBalance } = useReadContract({
+    address: ROE_WRAPPER_CONTRACT_ADDRESS,
+    abi: roeWrapperABI,
+    functionName: "balanceOf",
+    args: [address as `0x${string}`],
+  });
+
+  const { data: fortressIdsResult } = useReadContracts({
+    contracts: (new Array(Number(fortressBalance || 0))).map((_, i) => ({
+      address: ROE_WRAPPER_CONTRACT_ADDRESS as `0x${string}`,
+      abi: roeWrapperABI,
+      functionName: "tokenOfOwnerByIndex",
+      args: [address, i],
+    }))
+  });
+
   useEffect(() => {
-    const func = async () => {
-      if (goldContract != null) {
-        const balance: BigNumber = await goldContract.balanceOf(
-          selectedAddress
-        );
-        setGoldBalance(balance.toString());
-      }
-    };
-    func();
-  }, [goldContract, selectedAddress, rewards, rewardByStakeIds]);
+    if (fortressIdsResult != null) {
+      const v = fortressIdsResult.filter((v): v is {status: "success", result: string} => v.status === "success");
+      const updatedState = v.reduce((acc, v) => {
+        acc[v.result] = false;
+        return acc;
+      }, {} as Record<string, boolean>);
+      setFortressIds(updatedState);
+    }
+  }, [fortressIdsResult]);
 
-  // total fortresses locked
-  useEffect(() => {
-    const func = async () => {
-      if (roeWrapperContract != null) {
-        const balance: BigNumber = await roeWrapperContract.balanceOf(
-          GOLD_CONTRACT_ADDRESS
-        );
-        setTfl(balance.toString());
-      }
-    };
-    func();
-  }, [roeWrapperContract, selectedAddress, stakedIds]);
 
-  // setFortresses
-  useEffect(() => {
-    const func = async () => {
-      if (roeWrapperContract != null) {
-        const balance = await roeWrapperContract.balanceOf(selectedAddress);
-        const fortressIds: Record<string, boolean> = {};
 
-        for (let ind = 0; ind < balance; ind++) {
-          const result: BigNumber =
-            await roeWrapperContract.tokenOfOwnerByIndex(selectedAddress, ind);
-          fortressIds[result.toHexString()] = false;
-        }
-        setFortressIds(fortressIds);
-      }
-    };
-    func();
-  }, [roeWrapperContract, selectedAddress, stakedIds]);
-
-  // setStakeIds
-  useEffect(() => {
-    const func = async () => {
-      if (goldContract != null) {
-        const provider = new ethers.providers.Web3Provider(
-          (window as any).ethereum,
-          "any"
-        );
-    
-        const ethcallProvider = new Provider(provider);
-
-        await ethcallProvider.init(); // Only required when `chainId` is not provided in the `Provider` constructor
+  useWatchContractEvent({
+    address: GOLD_CONTRACT_ADDRESS,
+    abi: goldABI,
+    eventName: "FortressStaked",
+    fromBlock: 13319425n,
+    onLogs: async (logs) => {
+      const id = logs[0].args[0] as bigint;
       
-        goldContract.on(
-          goldContract.filters.FortressStaked(),
-          async (id: BigNumber) => {
-            const staker = (await goldContract.getStaker(id)).toLowerCase();
-            if (staker === selectedAddress) {
-              setStakedIds((currentValue) => {
-                const hexValues = [...(currentValue ?? []), id].map((v) =>
-                  v.toString()
-                );
-                const uniqueHexValues = [...new Set([...hexValues])];
-                return uniqueHexValues.map((uhv) => BigNumber.from(uhv));
-              });
-            }
-          }
-        );
-        const eventFilter = goldContract.filters.FortressStaked();
-        const events = await goldContract.queryFilter(eventFilter);
-        const allStakedIds = events.map((e: Event) => e?.args?.[0]);
-        const stakedForSelectedAddress: BigNumber[] = [];
+      const staker = await publicClient?.readContract({
+        address: GOLD_CONTRACT_ADDRESS,
+        abi: goldABI,
+        functionName: "getStaker",
+        args: [id],
+      });
 
-        // multicall gold 
-        const multicallGoldContract = new Contract(GOLD_CONTRACT_ADDRESS, goldABI);
-        const allStakers = await ethcallProvider.all(allStakedIds.map((id: string) => multicallGoldContract.getStaker(id)));
-        allStakers.map((staker: string) => staker.toLowerCase()).forEach((staker, index) => {
-          if (staker === selectedAddress) {
-            stakedForSelectedAddress.push(allStakedIds[index]);
-          }
-        })
-
-        const hexValues = stakedForSelectedAddress.map((v) => v.toString());
-        const uniqueHexValues = [...new Set([...hexValues])];
-
-        setStakedIds(uniqueHexValues.map((uhv) => BigNumber.from(uhv)));
+      if (staker === address) {
+        setStakedIds((currentValue) => {
+          const hexValues = [...(currentValue ?? []), id].map((v) => v.toString());
+          const uniqueHexValues = [...new Set([...hexValues])];
+          return uniqueHexValues.map((uhv) => BigInt(uhv));
+        });
       }
-    };
-    func();
+    }
+  })
 
-    return () => {
-      goldContract?.removeAllListeners();
-    };
-  }, [goldContract, selectedAddress]);
 
-  // gold supply
-  useEffect(() => {
-    const func = async () => {
-      if (goldContract != null) {
-        const supply: BigNumber = await goldContract.totalSupply();
-        setGoldSupply(supply.toString());
-      }
-    };
-    func();
-  }, [goldContract, selectedAddress, stakedIds, rewards, rewardByStakeIds]);
+  const { data: goldSupply } = useReadContract({
+    address: GOLD_CONTRACT_ADDRESS,
+    abi: goldABI,
+    functionName: "totalSupply",
+  });
 
   // rewards
   useEffect(() => {
     const func = async () => {
-      if (goldContract != null && stakedIds != null) {
-        let sum = constants.Zero;
-        const updatedRewardByStakeIds: Record<string, BigNumber> = {};
+      if (publicClient != null && stakedIds != null) {
+        let sum = 0n;
+        const updatedRewardByStakeIds: Record<string, bigint> = {};
 
-        for (const stakedId of stakedIds) {
-          const reward = await goldContract.getRewardsByTokenId(stakedId);
-          updatedRewardByStakeIds[stakedId.toString()] = reward;
-          sum = sum.add(reward);
-        }
+        const rewards = await publicClient.multicall({
+          contracts: stakedIds.map((id) => ({
+            address: GOLD_CONTRACT_ADDRESS,
+            abi: goldABI,
+            functionName: "getRewardsByTokenId",
+            args: [id],
+          } as const)),
+        });
+        rewards
+          .filter((r) : r is {status: "success", result: bigint} => r.status === "success")
+          .forEach((reward, index) => {
+            updatedRewardByStakeIds[stakedIds[index].toString()] = reward.result;
+            sum += reward.result;
+          });
+
         setRewards(sum);
         setRewardByStakeIds(updatedRewardByStakeIds);
         setIsLoading(false);
       }
     };
     func();
-  }, [goldContract, selectedAddress, stakedIds]);
+  }, [address, stakedIds]);
 
   // isApproved
   useEffect(() => {
     const func = async () => {
-      if (roeWrapperContract != null) {
-        const isApproved = await roeWrapperContract.isApprovedForAll(
-          selectedAddress,
-          GOLD_CONTRACT_ADDRESS
-        );
+      if (publicClient != null && address != null) {
+        const isApproved = await publicClient.readContract({
+          address: ROE_WRAPPER_CONTRACT_ADDRESS,
+          abi: roeWrapperABI,
+          functionName: "isApprovedForAll",
+          args: [address, GOLD_CONTRACT_ADDRESS],
+        });
         setApproved(isApproved);
       }
     };
     func();
-  }, [roeWrapperContract, selectedAddress]);
+  }, [address]);
 
   const requestApproval = async () => {
-    if (roeWrapperContract != null) {
-      const tx = await roeWrapperContract?.setApprovalForAll(
-        GOLD_CONTRACT_ADDRESS,
-        true
-      );
-      await tx.wait();
+    if (walletClient != null && publicClient != null) {
+      const {request} = await publicClient.simulateContract({
+        address: ROE_WRAPPER_CONTRACT_ADDRESS,
+        abi: roeWrapperABI,
+        functionName: "setApprovalForAll",
+        args: [GOLD_CONTRACT_ADDRESS, true],
+      });
+      const tx  = await walletClient.writeContract(request);
+      await publicClient.waitForTransactionReceipt({hash: tx});
       setApproved(true);
     }
   };
 
   const startStaking = async () => {
-    const idsToStake = Object.entries(fortressIds)
+    if (walletClient != null && publicClient != null) {
+      const idsToStake = Object.entries(fortressIds)
       .filter(([_key, value]) => value === true)
       .map(([key, _value]) => key);
 
-    await goldContract?.stakeByIds(idsToStake);
-    const updatedState = { ...fortressIds };
-    for (const idToStake of idsToStake) {
-      delete updatedState[idToStake];
+      const {request} = await publicClient.simulateContract({
+        address: GOLD_CONTRACT_ADDRESS,
+        abi: goldABI,
+        functionName: "stakeByIds",
+        args: [idsToStake.map((v) => BigInt(v))],
+      });
+      const tx = await walletClient.writeContract(request);
+      await publicClient.waitForTransactionReceipt({hash: tx});
+      
+      const updatedState = { ...fortressIds };
+      for (const idToStake of idsToStake) {
+        delete updatedState[idToStake];
+      }
+      setFortressIds(updatedState);
     }
-    setFortressIds(updatedState);
   };
 
   const claimRewards = async () => {
-    const tx = await goldContract?.claimByTokenIds(
-      stakedIds?.map((id) => id.toString())
-    );
-    await tx.wait();
-    setRewards(constants.Zero);
-    setRewardByStakeIds((currentValue) => ({
-      ...Object.fromEntries(
-        Object.entries(currentValue).map(([k, _v]) => [k, constants.Zero])
-      ),
-    }));
+    if (walletClient != null && publicClient != null && stakedIds != null) {
+      const {request} = await publicClient.simulateContract({
+        address: GOLD_CONTRACT_ADDRESS,
+        abi: goldABI,
+        functionName: "claimByTokenIds",
+        args: [stakedIds],
+      });
+      const tx = await walletClient.writeContract(request);
+      await publicClient.waitForTransactionReceipt({hash: tx});
+      setRewards(0n);
+      setRewardByStakeIds((currentValue) => ({
+        ...Object.fromEntries(
+          Object.entries(currentValue).map(([k, _v]) => [k, 0n])
+        ),
+      }));
+    }
   };
 
-  const claimRewardsById = async (id: BigNumber) => {
+  const claimRewardsById = async (id: bigint) => {
     const reward = rewardByStakeIds[id.toString()];
-    const tx = await goldContract?.claimByTokenId(id.toString());
-    await tx.wait();
+    if (walletClient != null && publicClient != null) {
+      const {request} = await publicClient.simulateContract({
+        address: GOLD_CONTRACT_ADDRESS,
+        abi: goldABI,
+        functionName: "claimByTokenId",
+        args: [id],
+      });
+      const tx = await walletClient.writeContract(request);
+      await publicClient.waitForTransactionReceipt({hash: tx});
+    }
     setRewardByStakeIds((currentValue) => ({
       ...currentValue,
-      [id.toString()]: constants.Zero,
+      [id.toString()]: 0n,
     }));
-    setRewards((currentValue) => currentValue.sub(reward));
+    setRewards((currentValue) => currentValue - reward);
   };
 
   const unstakeAll = async () => {
-    await goldContract?.unstakeByIds(stakedIds?.map((id) => id.toString()));
-    setStakedIds([]);
+    if (walletClient != null && publicClient != null && stakedIds != null) {
+      const {request} = await publicClient.simulateContract({
+        address: GOLD_CONTRACT_ADDRESS,
+        abi: goldABI,
+        functionName: "unstakeByIds",
+        args: [stakedIds],
+      });
+      const tx = await walletClient.writeContract(request);
+      await publicClient.waitForTransactionReceipt({hash: tx});
+      setStakedIds([]);
+    }
   };
 
-  const unstakeById = async (id: BigNumber) => {
-    await goldContract?.unstakeByIds([id.toString()]);
+  const unstakeById = async (id: bigint) => {
+    if (walletClient != null && publicClient != null) {
+      const {request} = await publicClient.simulateContract({
+        address: GOLD_CONTRACT_ADDRESS,
+        abi: goldABI,
+        functionName: "unstakeByIds",
+        args: [[id]],
+      });
+      const tx = await walletClient.writeContract(request);
+      await publicClient.waitForTransactionReceipt({hash: tx});
+    }
   };
 
   return (
@@ -346,7 +365,7 @@ const GoldMine: FC = () => {
                       <td>Total GOLD supply</td>
                       <td>
                         <div style={{ display: "flex", flexWrap: "nowrap" }}>
-                          {limitDecimals(formatEther(goldSupply))}{" "}
+                          {goldSupply != null ? limitDecimals(formatEther(goldSupply)) : "0"}{" "}
                           <img width={20} src={gold} alt="gold" />
                         </div>
                       </td>
@@ -364,7 +383,7 @@ const GoldMine: FC = () => {
                       <td>My GOLD balance</td>
                       <td>
                         <div style={{ display: "flex", flexWrap: "nowrap" }}>
-                          {limitDecimals(formatEther(goldBalance))}{" "}
+                          {goldBalance != null ? limitDecimals(formatEther(goldBalance)) : "0"}{" "}
                           <img width={20} src={gold} alt="gold" />
                         </div>
                       </td>
@@ -408,7 +427,7 @@ const GoldMine: FC = () => {
                               <div
                                 style={{ display: "flex", flexWrap: "nowrap" }}
                               >
-                                {limitDecimals(formatEther(rewards))}{" "}
+                                {rewards != null ? limitDecimals(formatEther(rewards)) : "0"}{" "}
                                 <img width={20} src={gold} alt="gold" />
                               </div>
                             </td>
@@ -449,7 +468,7 @@ const GoldMine: FC = () => {
                         <tbody style={{ whiteSpace: "nowrap" }}>
                           {stakedIds?.map((id) => {
                             const fortress = metadata.find(
-                              (data) => data.hash === id.toHexString()
+                              (data) => data.hash === toHex(id)
                             );
                             return (
                               <tr key={id.toString()}>

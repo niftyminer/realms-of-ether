@@ -1,7 +1,9 @@
-import { Contract } from "@ethersproject/contracts";
 import { Container, Table } from "nes-react";
 import { FC, useEffect, useState } from "react";
 import { FortressData } from "../metadata";
+import { usePublicClient } from "wagmi";
+import { ROE_CONTRACT_ADDRESS } from "../addresses";
+import { roeABI } from "../contracts/RealmsOfEther";
 
 type ResourceData = {
   gold: string;
@@ -10,24 +12,29 @@ type ResourceData = {
 };
 
 export const Resources: FC<{
-  contract: Contract | undefined;
   fortressData: FortressData | null;
-}> = ({ contract, fortressData }) => {
+}> = ({ fortressData }) => {
   const [resources, setResources] = useState<ResourceData | null>(null);
+  const publicClient = usePublicClient();
 
   useEffect(() => {
     const func = async () => {
-      if (contract != null && fortressData != null) {
-        const result = await contract.getResources(fortressData.hash);
+      if (fortressData != null && publicClient != null) {
+        const result = await publicClient.readContract({
+          address: ROE_CONTRACT_ADDRESS,
+          abi: roeABI,
+          functionName: "getResources",
+          args: [fortressData.hash as `0x${string}`],
+        });
         setResources({
-          gold: result._gold.toString(),
-          stone: result._stone.toString(),
-          wood: result._wood.toString(),
+          gold: result[0].toString(),
+          stone: result[1].toString(),
+          wood: result[2].toString(),
         });
       }
     };
     func();
-  }, [fortressData, contract]);
+  }, [fortressData, publicClient]);
 
   if (resources == null) {
     return null;

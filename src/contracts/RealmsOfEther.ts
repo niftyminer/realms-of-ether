@@ -1124,4 +1124,4 @@ export const roeABI = [
     name: "OwnershipTransferred",
     type: "event",
   },
-];
+] as const;

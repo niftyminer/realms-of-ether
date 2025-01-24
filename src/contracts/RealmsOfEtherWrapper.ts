@@ -238,4 +238,4 @@ export const roeWrapperABI = [
     stateMutability: "nonpayable",
     type: "function",
   },
-];
+] as const;
