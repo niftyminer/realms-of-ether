@@ -11,7 +11,6 @@ module.exports = {
         aliasFields: ["browser", "server"],
         alias: {
           ...config.resolve.alias,
-          fabric: "fabric-pure-browser",
         },
       },
     };
