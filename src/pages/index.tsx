@@ -1,5 +1,5 @@
 import { useRouter } from "next/dist/client/router";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Inspector } from "./inspect/Inspector";
 
 const IndexPage = () => {

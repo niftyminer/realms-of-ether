@@ -1,4 +1,4 @@
-import { FC, useState, PropsWithChildren } from "react";
+import { FC, PropsWithChildren } from "react";
 import {
   ConnectButton,
   getDefaultConfig,
@@ -56,20 +56,14 @@ export const Layout: FC<PropsWithChildren> = ({ children }) => {
                   alignItems: "center",
                 }}
               >
-                <Link href="/inspect">
-                  <a style={{ textDecoration: "none", color: "black" }}>
-                    <h3>Inspector</h3>
-                  </a>
+                <Link href="/inspect" style={{ textDecoration: "none", color: "black" }} >
+                  <h3>Inspector</h3>
                 </Link>
-                <Link href="/goldmine">
-                  <a style={{ textDecoration: "none", color: "black" }}>
-                    <h3>Gold Mine</h3>
-                  </a>
+                <Link href="/goldmine" style={{ textDecoration: "none", color: "black" }}>
+                  <h3>Gold Mine</h3>
                 </Link>
-                <Link href="/learn">
-                  <a style={{ textDecoration: "none", color: "black" }}>
-                    <h3>Learn</h3>
-                  </a>
+                <Link href="/learn" style={{ textDecoration: "none", color: "black" }}>
+                  <h3>Learn</h3>
                 </Link>
 
                 <a
@@ -92,10 +86,8 @@ export const Layout: FC<PropsWithChildren> = ({ children }) => {
                 paddingBottom: 15,
               }}
             >
-              <Link href="/">
-                <a style={{ textDecoration: "none", color: "black" }}>
-                  <h1>Realms Of Ether Revive</h1>
-                </a>
+              <Link href="/" style={{ textDecoration: "none", color: "black" }}>
+                <h1>Realms Of Ether Revive</h1>
               </Link>
             </div>
             <div

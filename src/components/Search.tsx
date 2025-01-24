@@ -1,8 +1,8 @@
 import { FC, useCallback, useEffect, useState } from "react";
-import { BigNumber } from "@ethersproject/bignumber";
 import { Container, TextInput, Button } from "nes-react";
 import { Row } from "./Row";
 import { FortressData } from "../metadata";
+import { hexToString } from "viem";
 
 export const Search: FC<{
   searchResult: FortressData | null | undefined;
@@ -16,9 +16,9 @@ export const Search: FC<{
     setX(xInput ?? "");
     setY(yInput ?? "");
   }, [xInput, yInput]);
-  const handleXChange = useCallback((e) => setX(e.target.value), []);
-  const handleYChange = useCallback((e) => setY(e.target.value), []);
-  const handleSearch = useCallback(() => setCoords(x, y), [x, y]);
+  const handleXChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setX(e.target.value), []);
+  const handleYChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setY(e.target.value), []);
+  const handleSearch = useCallback(() => setCoords(x, y), [x, y, setCoords]);
   return (
     <div style={{ padding: 10 }}>
       <Container rounded title="Search">
@@ -60,9 +60,9 @@ export const Search: FC<{
             <div style={{ paddingTop: "15px", paddingLeft: "10px" }}>
               {searchResult != null && (
                 <a
-                  href={`https://opensea.io/assets/0x8479277aacff4663aa4241085a7e27934a0b0840/${BigNumber.from(
-                    searchResult.hash
-                  ).toBigInt()}`}
+                  href={`https://opensea.io/assets/0x8479277aacff4663aa4241085a7e27934a0b0840/${hexToString(
+                    searchResult.hash as `0x${string}`
+                  )}`}
                   target="_blank"
                   rel="noreferrer"
                 >

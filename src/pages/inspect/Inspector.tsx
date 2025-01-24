@@ -19,7 +19,7 @@ export const Inspector: FC = () => {
   const publicClient = usePublicClient();
   const [xInput, yInput] = getCoords(router.query["coords"]);
   const setCoords = useCallback(
-    (x, y) => {
+    (x: string, y: string) => {
       router.push(`/inspect/${x}:${y}/`, undefined, { shallow: true });
     },
     [router]
@@ -59,14 +59,18 @@ export const Inspector: FC = () => {
           ownedFortressHashes.push(toHex(result));
         }
 
-        isSubscribed && setOwnerFortressHashes(ownedFortressHashes);
+        if (isSubscribed) {
+          setOwnerFortressHashes(ownedFortressHashes);
+        }
 
         const totalSupply = await publicClient.readContract({
           address: ROE_WRAPPER_CONTRACT_ADDRESS,
           abi: roeWrapperABI,
           functionName: "totalSupply",
         });
-        isSubscribed && setNumberOfWrapped(totalSupply);
+        if (isSubscribed) {
+          setNumberOfWrapped(totalSupply);
+        }
       }
     };
     func();
@@ -79,7 +83,7 @@ export const Inspector: FC = () => {
       <Search
         xInput={xInput}
         yInput={yInput}
-        setCoords={setCoords}
+        setCoords={setCoords as (x?: string, y?: string) => void}
         searchResult={searchResult}
       />
       <div style={{ padding: 10 }}>

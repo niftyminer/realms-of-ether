@@ -7,7 +7,7 @@ import Link from "next/link";
 import { goldABI } from "../../contracts/Gold";
 import { useAccount, usePublicClient, useReadContract, useReadContracts, useWatchContractEvent, useWalletClient } from "wagmi";
 import { roeWrapperABI } from "../../contracts/RealmsOfEtherWrapper";
-import { formatEther, parseAbiItem, toHex } from "viem";
+import { formatEther, toHex } from "viem";
 
 const gold = "/assets/gold.png";
 const castle = "assets/castle.png";
@@ -164,8 +164,8 @@ const GoldMine: FC = () => {
   const startStaking = async () => {
     if (walletClient != null && publicClient != null) {
       const idsToStake = Object.entries(fortressIds)
-      .filter(([_key, value]) => value === true)
-      .map(([key, _value]) => key);
+      .filter(([, value]) => value === true)
+      .map(([key,]) => key);
 
       const {request} = await publicClient.simulateContract({
         address: GOLD_CONTRACT_ADDRESS,
@@ -197,7 +197,7 @@ const GoldMine: FC = () => {
       setRewards(0n);
       setRewardByStakeIds((currentValue) => ({
         ...Object.fromEntries(
-          Object.entries(currentValue).map(([k, _v]) => [k, 0n])
+          Object.entries(currentValue).map(([k,]) => [k, 0n])
         ),
       }));
     }
@@ -298,7 +298,7 @@ const GoldMine: FC = () => {
           <br />
           <br /> Only a{" "}
           <Link href="/goldmine/faq">
-            <a>fortune teller</a>
+            fortune teller
           </Link>{" "}
           could tell, what all this means...
         </Container>
@@ -306,7 +306,6 @@ const GoldMine: FC = () => {
           {!approved && (
             <Button
               warning
-              // @ts-ignore
               onClick={requestApproval}
             >
               Allow the Gold Mine to handle your fortress
@@ -350,7 +349,6 @@ const GoldMine: FC = () => {
                     Object.values(fortressIds).filter((v) => v === true)
                       .length === 0
                   }
-                  // @ts-ignore
                   onClick={startStaking}
                 >
                   Start Earning
@@ -434,7 +432,6 @@ const GoldMine: FC = () => {
                             <td>
                               <Button
                                 primary
-                                // @ts-ignore
                                 onClick={claimRewards}
                               >
                                 Claim
@@ -443,7 +440,6 @@ const GoldMine: FC = () => {
                             <td>
                               <Button
                                 error
-                                // @ts-ignore
                                 onClick={unstakeAll}
                               >
                                 Unstake
@@ -493,7 +489,6 @@ const GoldMine: FC = () => {
                                 <td>
                                   <Button
                                     primary
-                                    // @ts-ignore
                                     onClick={() => claimRewardsById(id)}
                                   >
                                     Collect
@@ -502,7 +497,6 @@ const GoldMine: FC = () => {
                                 <td>
                                   <Button
                                     error
-                                    // @ts-ignore
                                     onClick={() => unstakeById(id)}
                                   >
                                     Unstake
