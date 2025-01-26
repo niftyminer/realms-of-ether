@@ -68,6 +68,19 @@ const GoldMine: FC = () => {
   }, [fortressIdsResult]);
 
 
+  // useEffect(() => {
+  //   const func = async () => {
+  //     if (publicClient != null) {
+  //       const logs = await publicClient.getLogs({
+  //         address: GOLD_CONTRACT_ADDRESS,
+  //         event: parseAbiItem("event FortressStaked(uint256 indexed tokenId)"),
+  //         fromBlock: 13319425n,
+  //       });
+  //       console.log(logs);
+  //     }
+  //   };
+  //   func();
+  // }, [publicClient]);
 
   useWatchContractEvent({
     address: GOLD_CONTRACT_ADDRESS,
